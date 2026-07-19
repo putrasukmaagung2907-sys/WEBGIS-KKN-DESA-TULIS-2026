@@ -1,0 +1,306 @@
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+#map {
+    height: 100vh;
+    width: 100%;
+    z-index: 1;
+}
+
+/* Styling kustom untuk InfoWindow / Popup */
+.popup-content {
+    max-width: 260px;
+}
+
+.popup-content h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 15px;
+    color: #2c3e50;
+    border-bottom: 2px solid #e74c3c;
+    padding-bottom: 5px;
+}
+
+.popup-gallery {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.popup-gallery figure {
+    margin: 0;
+    width: 48%;
+}
+
+.popup-gallery img {
+    width: 100%;
+    height: 90px;
+    object-fit: cover;
+    border-radius: 4px;
+    border: 1px solid #bdc3c7;
+}
+
+.popup-gallery figcaption {
+    font-size: 10px;
+    text-align: center;
+    color: #7f8c8d;
+    margin-top: 3px;
+    font-weight: bold;
+}
+
+.popup-content p {
+    margin: 5px 0;
+    font-size: 12px;
+    color: #34495e;
+    line-height: 1.4;
+}
+
+/* Styling untuk label nama tempat di sebelah titik merah */
+.label-tempat {
+    background-color: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    color: #ffffff;
+    text-shadow: 1px 1px 2px #000, -1px -1px 2px #000, 1px -1px 2px #000, -1px 1px 2px #000;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+/* Sembunyikan panel teks instruksi rute (turn-by-turn) bawaan plugin */
+.leaflet-routing-container {
+    display: none !important;
+}
+
+/* Styling untuk Panel Jarak Tempuh */
+#route-info {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    background: rgba(44, 62, 80, 0.9);
+    color: #ffffff;
+    padding: 10px 24px;
+    border-radius: 30px;
+    font-size: 14px;
+    font-weight: 500;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+    display: none; /* Disembunyikan saat web pertama dibuka */
+    border: 2px solid #3498db;
+}
+
+#route-info b {
+    color: #f39c12;
+    font-size: 16px;
+    margin-left: 5px;
+}
+
+/* --- GANTI BAGIAN CSS FILTER SEBELUMNYA DENGAN INI --- */
+
+/* Wadah Utama Filter */
+#filter-container {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end; /* Rata kanan */
+}
+
+/* Tombol Utama (Buka/Tutup Filter) */
+#filter-toggle-btn {
+    background: rgba(44, 62, 80, 0.95);
+    color: white;
+    border: 2px solid #3498db;
+    padding: 8px 15px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+    margin-bottom: 8px;
+    transition: background 0.3s ease;
+}
+
+#filter-toggle-btn:hover {
+    background: rgba(52, 73, 94, 1);
+}
+
+/* Panel Isi Tombol Kategori */
+#filter-panel {
+    background: rgba(44, 62, 80, 0.95);
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+    border: 1px solid #3498db;
+    min-width: 170px;
+    display: none; /* Disembunyikan saat web pertama kali dibuka */
+}
+
+/* Class pembantu untuk memunculkan panel dari JavaScript */
+#filter-panel.show {
+    display: block;
+}
+
+/* Tombol Kategori di Dalam Panel */
+.filter-btn {
+    display: block;
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 6px;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    text-align: left;
+    transition: all 0.3s ease;
+}
+
+.filter-btn:last-child {
+    margin-bottom: 0; /* Hilangkan jarak di bawah tombol terakhir */
+}
+
+/* Warna unik per tombol saat aktif */
+.filter-btn[data-category="Pusat Pemerintahan"].active { background-color: #9b59b6; }
+.filter-btn[data-category="Fasilitas Ibadah"].active { background-color: #5965b6; }
+.filter-btn[data-category="Fasilitas Kesehatan"].active { background-color: #e74c3c; }
+.filter-btn[data-category="Fasilitas Pendidikan"].active { background-color: #2ecc71; }
+.filter-btn[data-category="UMKM"].active { background-color: #631861; }
+.filter-btn[data-category="Keamanan Lingkungan"].active { background-color: #34495e; }
+.filter-btn[data-category="Jalan Desa"].active { background-color: #c9a01a; }
+.filter-btn[data-category="Jalan Pantura"].active { background-color: #2c12f3; }
+
+/* Gaya tombol saat dimatikan */
+.filter-btn:not(.active) {
+    background-color: #7f8c8d !important;
+    color: #bdc3c7;
+    text-decoration: line-through;
+    opacity: 0.7;
+}
+
+/* Panel Status ala Google Earth */
+#earth-status-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: rgba(0, 0, 0, 0.4);
+    color: #ffffff;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 4px 0;
+    z-index: 1000;
+    display: flex;
+    justify-content: left;
+    gap: 25px;
+    pointer-events: none; /* Agar mouse tetap bisa mengklik area peta di bawahnya */
+    text-shadow: 1px 1px 2px black, -1px -1px 2px black, 1px -1px 2px black, -1px 1px 2px black;
+}
+
+/* ==========================================
+   Styling untuk Legenda Peta
+   ========================================== */
+.legend {
+    background: rgba(44, 62, 80, 0.95);
+    padding: 10px 15px;
+    color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+    border: 1px solid #3498db;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+/* Mengangkat kotak legenda agar tidak tertabrak panel status Google Earth di bawah */
+.leaflet-bottom .leaflet-control.legend {
+    margin-bottom: 35px; 
+}
+
+.legend h4 {
+    margin: 0 0 8px 0;
+    color: #ffffff;
+    border-bottom: 2px solid #3498db;
+    padding-bottom: 4px;
+    font-size: 13px;
+    text-align: center;
+}
+
+.legend i {
+    width: 12px;
+    height: 12px;
+    float: left;
+    margin-right: 8px;
+    margin-top: 3px;
+    border-radius: 50%; /* Membuat ikon kotak menjadi bulat */
+    border: 1px solid #ffffff;
+}
+
+body, html { margin: 0; padding: 0; height: 100%; font-family: 'Segoe UI', Tahoma, sans-serif; }
+#map { height: 100vh; width: 100%; z-index: 1; }
+
+/* Styling Popup */
+.popup-content { max-width: 260px; }
+.popup-content h3 { margin: 0 0 10px 0; font-size: 15px; color: #2c3e50; border-bottom: 2px solid #e74c3c; padding-bottom: 5px; }
+.popup-gallery { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
+.popup-gallery figure { margin: 0; width: 48%; }
+.popup-gallery img { width: 100%; height: 90px; object-fit: cover; border-radius: 4px; border: 1px solid #bdc3c7; }
+.popup-gallery figcaption { font-size: 10px; text-align: center; color: #7f8c8d; margin-top: 3px; font-weight: bold; }
+.popup-content p { margin: 5px 0; font-size: 12px; color: #34495e; line-height: 1.4; }
+
+/* Tombol WhatsApp */
+.wa-btn { display: inline-block; background-color: #25D366; color: white; padding: 4px 8px; border-radius: 4px; text-decoration: none; font-size: 11px; font-weight: bold; margin-top: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+.wa-btn:hover { background-color: #128C7E; }
+
+.label-tempat { background-color: transparent !important; border: none !important; box-shadow: none !important; color: #ffffff; text-shadow: 1px 1px 2px #000, -1px -1px 2px #000, 1px -1px 2px #000, -1px 1px 2px #000; font-size: 11px; font-weight: 600; }
+.leaflet-routing-container { display: none !important; }
+
+/* Panel Search */
+#search-container { position: absolute; top: 15px; left: 60px; z-index: 1000; display: flex; box-shadow: 0 2px 5px rgba(0,0,0,0.3); border-radius: 4px; overflow: hidden; }
+#search-input { border: none; padding: 10px; width: 220px; font-size: 13px; outline: none; }
+#search-btn { background: #3498db; color: white; border: none; padding: 10px 15px; cursor: pointer; font-size: 14px; }
+#search-btn:hover { background: #2980b9; }
+
+/* Filter Panel */
+#filter-container { position: absolute; top: 15px; right: 15px; z-index: 1000; display: flex; flex-direction: column; align-items: flex-end; }
+#filter-toggle-btn { background: rgba(44, 62, 80, 0.95); color: white; border: 2px solid #3498db; padding: 8px 15px; border-radius: 8px; font-size: 13px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.4); margin-bottom: 8px; }
+#filter-panel { background: rgba(44, 62, 80, 0.95); padding: 10px; border-radius: 8px; border: 1px solid #3498db; min-width: 170px; display: none; }
+#filter-panel.show { display: block; }
+.filter-btn { display: block; width: 100%; padding: 8px; margin-bottom: 6px; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600; text-align: left; }
+.filter-btn:last-child { margin-bottom: 0; }
+.filter-btn[data-category="Pusat Pemerintahan"].active { background-color: #9b59b6; }
+.filter-btn[data-category="Fasilitas Ibadah"].active { background-color: #5965b6; }
+.filter-btn[data-category="Fasilitas Kesehatan"].active { background-color: #e74c3c; }
+.filter-btn[data-category="Fasilitas Pendidikan"].active { background-color: #2ecc71; }
+.filter-btn[data-category="UMKM"].active { background-color: #631861; }
+.filter-btn[data-category="Keamanan Lingkungan"].active { background-color: #34495e; }
+.filter-btn[data-category="Jalan Desa"].active { background-color: #c9a01a; }
+.filter-btn[data-category="Jalan Pantura"].active { background-color: #2c12f3; }
+.filter-btn:not(.active) { background-color: #7f8c8d !important; color: #bdc3c7; text-decoration: line-through; opacity: 0.7; }
+
+/* Panel Info & Status */
+#route-info { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); z-index: 1000; background: rgba(44, 62, 80, 0.9); color: #fff; padding: 10px 24px; border-radius: 30px; font-size: 14px; font-weight: 500; border: 2px solid #3498db; display: none; }
+#route-info b { color: #f39c12; margin-left: 5px; }
+#earth-status-bar { position: absolute; bottom: 0; left: 0; width: 100%; background: rgba(0, 0, 0, 0.5); color: #fff; font-size: 14px; padding: 4px 10px; z-index: 1000; display: flex; gap: 20px; pointer-events: none; }
+
+/* Legenda */
+.legend { background: rgba(44, 62, 80, 0.95); padding: 10px 15px; color: white; border-radius: 8px; border: 1px solid #3498db; font-size: 12px; line-height: 1.5; }
+.leaflet-bottom .leaflet-control.legend { margin-bottom: 35px; }
+.legend h4 { margin: 0 0 8px 0; border-bottom: 2px solid #3498db; padding-bottom: 4px; text-align: center; }
+.legend i { width: 12px; height: 12px; float: left; margin-right: 8px; margin-top: 3px; border-radius: 50%; border: 1px solid #fff; }
+
+/* Media Query untuk Responsivitas Mobile */
+@media (max-width: 768px) {
+    #search-input { width: 140px; }
+    #earth-status-bar { font-size: 10px; gap: 8px; flex-wrap: wrap; }
+    #route-info { font-size: 12px; padding: 8px 15px; bottom: 50px; width: 80%; text-align: center; }
+    #filter-container { top: 60px; right: 10px; }
+}

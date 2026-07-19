@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebGIS Desa Tulis - Peta Interaktif</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css" />
+    <!-- Plugin Marker Cluster CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Fitur Pencarian -->
+    <div id="search-container">
+        <input type="text" id="search-input" placeholder="Cari lokasi (contoh: SDN Tulis)...">
+        <button id="search-btn">🔍</button>
+    </div>
+
+    <!-- Wadah Panel Filter -->
+    <div id="filter-container">
+        <button id="filter-toggle-btn">⚙️ Filter Kategori</button>
+        <div id="filter-panel" class="hidden">
+            <button class="filter-btn active" data-category="Pusat Pemerintahan">Pusat Pemerintahan</button>
+            <button class="filter-btn active" data-category="Fasilitas Ibadah">Fasilitas Ibadah</button>
+            <button class="filter-btn active" data-category="Fasilitas Kesehatan">Fasilitas Kesehatan</button>
+            <button class="filter-btn active" data-category="Fasilitas Pendidikan">Fasilitas Pendidikan</button>
+            <button class="filter-btn active" data-category="UMKM">UMKM</button>
+            <button class="filter-btn active" data-category="Keamanan Lingkungan">Keamanan Lingkungan</button>
+            <button class="filter-btn active" data-category="Jalan Desa">Jalan Desa</button>
+            <button class="filter-btn active" data-category="Jalan Pantura">Jalan Pantura</button>
+        </div>
+    </div>
+
+    <!-- Panel Info Jarak Tempuh -->
+    <div id="route-info">Jarak Tempuh: <span id="distance-text">0 meter</span></div>
+
+    <!-- Panel Status ala Google Earth -->
+    <div id="earth-status-bar">
+        <span id="coord-lat">0°0'0.00"S</span>
+        <span id="coord-lng">0°0'0.00"T</span>
+        <span>Elevasi: <span id="elev-val">0 m</span></span>
+        <span>Ketinggian Mata: <span id="eye-alt">0 km</span></span>
+    </div>
+
+    <div id="map"></div>
+
+    <!-- Library Scripts -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
+    <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.9.0/proj4.min.js"></script>
+
+    <!-- PANGGIL FILE LOKAL -->
+    <script src="data.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
