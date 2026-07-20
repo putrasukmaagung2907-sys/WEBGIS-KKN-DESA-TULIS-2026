@@ -14,6 +14,8 @@ L.control.layers({
 }, null, { position: 'topleft' }).addTo(map);
 
 let routingControl = null;
+
+// HAPUS LOKASI OFFLINE: Biarkan kosong agar murni menunggu lokasi dari device pengguna
 let currentLat = null; 
 let currentLng = null;
 let userMarker = null; // Marker biru belum dibuat sebelum lokasi nyata ditemukan
@@ -29,15 +31,10 @@ map.on('dblclick', function() {
 
 
 // ==========================================
-// 2. SET LOKASI SAYA (GPS REAL-TIME)
+// 2. SET LOKASI SAYA (GPS REAL-TIME FIX HP)
 // ==========================================
 
-// Inisialisasi marker lokasi user dengan ikon biru
-const userMarker = L.circleMarker([currentLat, currentLng], {
-    radius: 7, fillColor: "#3498db", color: "#ffffff", weight: 2, fillOpacity: 1, zIndexOffset: 1000
-}).addTo(map).bindTooltip("Lokasi Anda", { permanent: true, direction: 'right', offset: [5, 0], className: 'label-tempat' });
-
-// Fungsi untuk memperbarui lokasi saat perangkat bergerak
+// Fungsi untuk memperbarui lokasi saat perangkat mendapat sinyal
 function onLocationFound(e) {
     currentLat = e.latlng.lat;
     currentLng = e.latlng.lng;
@@ -55,7 +52,7 @@ function onLocationFound(e) {
 
 // Menangani error jika izin lokasi ditolak atau sinyal susah
 function onLocationError(e) {
-    // Pesan error sementara dimatikan untuk timeout agar tidak terus-terusan muncul popup (spam) di HP pengguna
+    // Pesan error sementara dimatikan untuk timeout agar tidak terus-terusan muncul popup di HP
     if (e.code !== 3) {
         console.warn("Akses lokasi terhambat: " + e.message);
     }
@@ -68,9 +65,9 @@ map.on('locationerror', onLocationError);
 map.locate({ 
     setView: false, 
     watch: true, 
-    enableHighAccuracy: false, // UBAH KE FALSE: Izinkan HP memakai sinyal Tower BTS/Wi-Fi agar super cepat dapat lokasi tanpa menunggu satelit
+    enableHighAccuracy: false, // Izinkan HP memakai sinyal Tower BTS/Wi-Fi agar super cepat dapat lokasi
     maximumAge: 10000, 
-    timeout: 30000 // PERPANJANG TIMEOUT: Beri waktu HP 30 detik untuk berpikir, bukan 10 detik
+    timeout: 30000 // Beri waktu HP 30 detik untuk mencari sinyal
 });
 
 
@@ -130,8 +127,7 @@ function getMarkerColor(kategori) {
 // Data Array untuk Search
 let searchData = [];
 
-// FUNGSI BANTUAN UNTUK GENERATE HTML POPUP AWAL (SIMPEL)
-// PERHATIKAN: Menambahkan kata 'event' di dalam parameter onclick
+// FUNGSI BANTUAN UNTUK GENERATE HTML POPUP AWAL
 function getPopupAwalHTML(index) {
     const loc = locations[index];
     return `
@@ -144,10 +140,12 @@ function getPopupAwalHTML(index) {
 
 locations.forEach((loc, index) => {
     const markerColor = getMarkerColor(loc.type);
-const marker = L.circleMarker([loc.lat, loc.lng], {
+    
+    // Label permanen dengan offset untuk mencegah tumpang tindih dengan titik merah
+    const marker = L.circleMarker([loc.lat, loc.lng], {
         radius: 6, fillColor: markerColor, color: "#ffffff", weight: 1.5, fillOpacity: 1
     })
-    .bindTooltip(loc.name, { permanent: true, direction: 'top', offset: [0, -5], className: 'label-tempat' }) // Ubah jadi true & tambah offset
+    .bindTooltip(loc.name, { permanent: true, direction: 'top', offset: [0, -5], className: 'label-tempat' })
     .bindPopup(getPopupAwalHTML(index));
 
     if(layerGroups[loc.type]) { marker.addTo(layerGroups[loc.type]); } 
@@ -159,7 +157,7 @@ const marker = L.circleMarker([loc.lat, loc.lng], {
     marker.on('popupclose', function() {
         setTimeout(() => {
             marker.setPopupContent(getPopupAwalHTML(index));
-        }, 300); // Jeda agar perubahan tidak terlihat berkedip saat popup memudar menutup
+        }, 300);
     });
 });
 
@@ -167,10 +165,9 @@ const marker = L.circleMarker([loc.lat, loc.lng], {
 // FUNGSI GLOBAL UNTUK BERALIH POPUP
 // ==========================================
 
-// Fungsi Beralih ke Popup Detail
 window.tampilkanDetailBaru = function(index, event) {
     if (event) {
-        event.stopPropagation(); // Mencegah klik tembus ke peta dan menutup popup
+        event.stopPropagation();
         event.preventDefault();
     }
 
@@ -178,8 +175,6 @@ window.tampilkanDetailBaru = function(index, event) {
     const marker = searchData[index].marker;
     let waButtonHTML = loc.whatsapp ? `<a href="https://wa.me/${loc.whatsapp}" target="_blank" class="wa-btn">💬 Chat Pemilik/Admin</a>` : '';
     
-    // Generate HTML untuk konten detail lengkap
-    // PERHATIKAN: Tombol kembali dan navigasi juga diberi parameter 'event'
     const detailHTML = `
         <div class="popup-content" style="position: relative; min-width: 220px; text-align: left;">
             <h3 style="margin-bottom: 5px; border-bottom: 2px solid #e74c3c; padding-bottom: 5px;">${loc.name}</h3>
@@ -192,7 +187,6 @@ window.tampilkanDetailBaru = function(index, event) {
             <p><strong>Info:</strong> ${loc.desc}</p>
             ${waButtonHTML}
             
-            <!-- Area Tombol Aksi Bawah -->
             <div style="margin-top: 15px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #bdc3c7; padding-top: 8px;">
                 <button onclick="window.kembaliKeAwal(${index}, event)" style="background: #7f8c8d; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold;">⬅️ Kembali</button>
                 
@@ -203,11 +197,9 @@ window.tampilkanDetailBaru = function(index, event) {
         </div>
     `;
     
-    // Perintahkan Leaflet untuk menukar isi konten
     marker.setPopupContent(detailHTML);
 };
 
-// Fungsi Beralih Kembali ke Popup Awal
 window.kembaliKeAwal = function(index, event) {
     if (event) {
         event.stopPropagation();
@@ -216,18 +208,16 @@ window.kembaliKeAwal = function(index, event) {
     searchData[index].marker.setPopupContent(getPopupAwalHTML(index));
 };
 
-// Fungsi navigasi rute
-// Fungsi navigasi rute
 window.buatRute = function(index, event) {
     if (event) {
         event.stopPropagation();
         event.preventDefault();
     }
 
-    // TAMBAHAN BARU: Cek apakah sinyal GPS sudah didapat
+    // Cek apakah sinyal GPS sudah didapat
     if (!currentLat || !currentLng) {
         alert("Mohon tunggu sebentar, sistem sedang mencari titik lokasi GPS Anda...");
-        return; // Hentikan proses pembuatan rute agar tidak error
+        return; 
     }
 
     const loc = locations[index];
@@ -299,8 +289,8 @@ function updateEyeAltitude() {
     const altKm = 40000 / Math.pow(2, zoom);
     document.getElementById('eye-alt').textContent = altKm > 1 ? altKm.toFixed(2) + " km" : (altKm * 1000).toFixed(0) + " m";
     
-    // Logika ala Google Maps: Sembunyikan teks jika ketinggian > 1.22 km (Zoom < 15)
-    if (zoom < 16) {
+    // Logika ala Google Maps: Sembunyikan teks label tempat jika Zoom < 15
+    if (zoom < 15) {
         document.getElementById('map').classList.add('hide-labels');
     } else {
         document.getElementById('map').classList.remove('hide-labels');
@@ -330,8 +320,6 @@ updateEyeAltitude();
 // ==========================================
 // 6. LEGENDA, KOMPAS, & FUNGSI TOGGLE
 // ==========================================
-
-// Fungsi Global untuk Slide Animasi Legenda di HP (Versi Fix HP)
 window.toggleLegenda = function() {
     const legendContainer = document.querySelector('.legend-container');
     if (legendContainer) {
@@ -344,7 +332,6 @@ legend.onAdd = function (map) {
     const div = L.DomUtil.create('div', 'info legend-container');
     const categories = ["Pusat Pemerintahan", "Fasilitas Ibadah", "Fasilitas Kesehatan", "Fasilitas Pendidikan", "UMKM", "Keamanan Lingkungan"];
     
-    // 1. Kotak Konten Legenda
     let content = '<div class="legend-content">';
     content += '<h4>Legenda <button type="button" class="close-legend-btn" onclick="window.toggleLegenda()">✖</button></h4>';
     categories.forEach(cat => { content += `<i style="background:${getMarkerColor(cat)}"></i> ${cat}<br>`; });
@@ -355,11 +342,10 @@ legend.onAdd = function (map) {
     content += '<i style="background: transparent; border-top: 3px dashed #b1aeae; height: 0; margin-top: 8px; border-radius: 0;"></i> Batas Administrasi<br>';
     content += '</div>';
 
-    // 2. Tombol Buka Legenda (Ditambah type="button")
     let btn = '<button type="button" id="legend-toggle-btn" onclick="window.toggleLegenda()">📜 Legenda</button>';
 
     div.innerHTML = btn + content;
-    L.DomEvent.disableClickPropagation(div); // Leaflet sudah otomatis memblokir klik tembus ke peta di sini
+    L.DomEvent.disableClickPropagation(div);
 
     return div;
 };
