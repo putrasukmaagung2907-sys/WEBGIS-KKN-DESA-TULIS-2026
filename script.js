@@ -50,7 +50,25 @@ function onLocationFound(e) {
 
 // Menangani error jika izin lokasi ditolak
 function onLocationError(e) {
-    alert("Lokasi tidak dapat diakses. Pastikan izin lokasi (GPS) di browser Anda aktif.");
+    let pesan = "Lokasi tidak dapat diakses.\n\n";
+    switch (e.code) {
+        case 1: // PERMISSION_DENIED
+            pesan += "Izin lokasi ditolak. Cek 3 tempat ini di HP:\n" +
+                     "1) Pengaturan sistem HP > Lokasi (aktifkan)\n" +
+                     "2) Pengaturan aplikasi Chrome > Izin > Lokasi (Izinkan)\n" +
+                     "3) Ikon gembok di address bar Chrome > Izin situs > Lokasi (Izinkan)";
+            break;
+        case 2: // POSITION_UNAVAILABLE
+            pesan += "Sinyal GPS tidak ditemukan. Coba pindah ke luar ruangan / tempat terbuka, dan pastikan mode lokasi HP diset ke 'Akurasi Tinggi'.";
+            break;
+        case 3: // TIMEOUT
+            pesan += "Waktu pencarian lokasi habis (sinyal GPS lambat). Coba lagi di tempat dengan sinyal lebih baik.";
+            break;
+        default:
+            pesan += "Penyebab tidak diketahui (kode error: " + e.code + ").";
+    }
+    alert(pesan);
+    console.error("Geolocation error:", e.code, e.message);
 }
 
 // Konfigurasi pelacakan (watch: true berarti akan terus melacak pergerakan)
