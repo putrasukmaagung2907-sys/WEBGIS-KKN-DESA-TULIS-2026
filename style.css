@@ -1,8 +1,9 @@
-body, html {
-    margin: 0;
-    padding: 0;
-    height: 100%;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+body, html { 
+    margin: 0; 
+    padding: 0; 
+    height: 100%; 
+    font-family: 'Segoe UI', Tahoma, sans-serif; 
+    overflow-x: hidden; /* Tambahan: Mencegah layar bisa digeser ke samping */
 }
 
 #map {
@@ -69,6 +70,14 @@ body, html {
     text-shadow: 1px 1px 2px #000, -1px -1px 2px #000, 1px -1px 2px #000, -1px 1px 2px #000;
     font-size: 11px;
     font-weight: 600;
+    /* Tambahan animasi memudar yang halus */
+    transition: opacity 0.3s ease, visibility 0.3s ease; 
+}
+
+/* Trik Google Maps: Menyembunyikan label saat zoom out */
+.hide-labels .label-tempat {
+    opacity: 0 !important;
+    visibility: hidden !important;
 }
 
 /* Sembunyikan panel teks instruksi rute (turn-by-turn) bawaan plugin */
@@ -99,8 +108,6 @@ body, html {
     font-size: 16px;
     margin-left: 5px;
 }
-
-/* --- GANTI BAGIAN CSS FILTER SEBELUMNYA DENGAN INI --- */
 
 /* Wadah Utama Filter */
 #filter-container {
@@ -181,30 +188,13 @@ body, html {
 /* Gaya tombol saat dimatikan */
 .filter-btn:not(.active) {
     background-color: #7f8c8d !important;
-    color: #bdc3c7;
+    color: #1d5b84;
     text-decoration: line-through;
     opacity: 0.7;
 }
 
 /* Panel Status ala Google Earth */
-#earth-status-bar {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    background: rgba(0, 0, 0, 0.4);
-    color: #ffffff;
-    font-family: Arial, sans-serif;
-    font-size: 14px;
-    font-weight: 500;
-    padding: 4px 0;
-    z-index: 1000;
-    display: flex;
-    justify-content: left;
-    gap: 25px;
-    pointer-events: none; /* Agar mouse tetap bisa mengklik area peta di bawahnya */
-    text-shadow: 1px 1px 2px black, -1px -1px 2px black, 1px -1px 2px black, -1px 1px 2px black;
-}
+#earth-status-bar { position: absolute; bottom: 0; left: 0; width: 100%; box-sizing: border-box; background: rgba(0, 0, 0, 0.5); color: #fff; font-size: 14px; padding: 4px 10px; z-index: 1000; display: flex; gap: 20px; pointer-events: none; }
 
 /* ==========================================
    Styling untuk Legenda Peta

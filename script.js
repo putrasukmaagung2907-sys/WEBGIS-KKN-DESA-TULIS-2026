@@ -30,20 +30,40 @@ map.on('dblclick', function() {
 // ==========================================
 // 2. SET LOKASI SAYA (GPS REAL-TIME)
 // ==========================================
+
+// Inisialisasi marker lokasi user dengan ikon biru
 const userMarker = L.circleMarker([currentLat, currentLng], {
     radius: 7, fillColor: "#3498db", color: "#ffffff", weight: 2, fillOpacity: 1, zIndexOffset: 1000
 }).addTo(map).bindTooltip("Lokasi Anda", { permanent: true, direction: 'right', offset: [5, 0], className: 'label-tempat' });
 
-// Aktifkan Pelacakan Lokasi Otomatis
-map.locate({setView: false, watch: true, enableHighAccuracy: true});
-map.on('locationfound', function(e) {
-    currentLat = e.latlng.lat;
+// Fungsi untuk memperbarui lokasi saat perangkat bergerak
+function onLocationFound(e) {
+    currentLat = e.latlng.lat; // Memperbarui variabel lokasi saat ini
     currentLng = e.latlng.lng;
-    userMarker.setLatLng(e.latlng).bindPopup("<b>Lokasi anda saat ini</b>");
-});
-map.on('locationerror', function(e) {
-    console.log("GPS dinonaktifkan atau gagal diakses. Menggunakan lokasi default.");
-    userMarker.bindPopup("<b>Lokasi Default (GPS Mati)</b>");
+    
+    // Memindahkan marker ke lokasi terbaru
+    userMarker.setLatLng(e.latlng);
+    
+    // Update tooltip
+    userMarker.bindPopup("<b>Lokasi Anda Saat Ini</b>").openPopup();
+}
+
+// Menangani error jika izin lokasi ditolak
+function onLocationError(e) {
+    alert("Lokasi tidak dapat diakses. Pastikan izin lokasi (GPS) di browser Anda aktif.");
+}
+
+// Konfigurasi pelacakan (watch: true berarti akan terus melacak pergerakan)
+map.on('locationfound', onLocationFound);
+map.on('locationerror', onLocationError);
+
+// Menjalankan pelacakan dengan akurasi tinggi
+map.locate({ 
+    setView: false, 
+    watch: true, 
+    enableHighAccuracy: true, 
+    maximumAge: 5000, 
+    timeout: 10000 
 });
 
 
@@ -109,7 +129,7 @@ function getPopupAwalHTML(index) {
     const loc = locations[index];
     return `
         <div class="popup-content" style="text-align: center; min-width: 150px;">
-            <h3 style="margin-bottom: 8px; border-bottom: 2px solid #e74c3c; padding-bottom: 5px;">${loc.name}</h3>
+            <h3 style="margin-bottom: 8px; border-bottom: 2px solid #5e3ce7; padding-bottom: 5px;">${loc.name}</h3>
             <button class="btn-detail-popup" onclick="window.tampilkanDetailBaru(${index}, event)">Detail⬇️</button>
         </div>
     `;
@@ -117,11 +137,11 @@ function getPopupAwalHTML(index) {
 
 locations.forEach((loc, index) => {
     const markerColor = getMarkerColor(loc.type);
-    const marker = L.circleMarker([loc.lat, loc.lng], {
+const marker = L.circleMarker([loc.lat, loc.lng], {
         radius: 6, fillColor: markerColor, color: "#ffffff", weight: 1.5, fillOpacity: 1
     })
-    .bindTooltip(loc.name, { permanent: false, direction: 'top', className: 'label-tempat' })
-    .bindPopup(getPopupAwalHTML(index)); // Ikat popup awal
+    .bindTooltip(loc.name, { permanent: true, direction: 'top', offset: [0, -5], className: 'label-tempat' }) // Ubah jadi true & tambah offset
+    .bindPopup(getPopupAwalHTML(index));
 
     if(layerGroups[loc.type]) { marker.addTo(layerGroups[loc.type]); } 
     
@@ -261,14 +281,34 @@ function toDMS(coordinate, isLat) {
 }
 
 function updateEyeAltitude() {
-    const zoom = map.getZoom(); const altKm = 40000 / Math.pow(2, zoom);
+    const zoom = map.getZoom(); 
+    const altKm = 40000 / Math.pow(2, zoom);
     document.getElementById('eye-alt').textContent = altKm > 1 ? altKm.toFixed(2) + " km" : (altKm * 1000).toFixed(0) + " m";
+    
+    // Logika ala Google Maps: Sembunyikan teks jika ketinggian > 1.22 km (Zoom < 15)
+    if (zoom < 16) {
+        document.getElementById('map').classList.add('hide-labels');
+    } else {
+        document.getElementById('map').classList.remove('hide-labels');
+    }
 }
 
+// Fungsi Ringkas untuk mencetak angka ke status bar
+function perbaruiKoordinatBar(latlng) {
+    document.getElementById('coord-lat').textContent = toDMS(latlng.lat, true);
+    document.getElementById('coord-lng').textContent = toDMS(latlng.lng, false);
+}
+
+// 1. UNTUK DESKTOP (Komputer): Baca ujung panah mouse
 map.on('mousemove', function(e) {
-    document.getElementById('coord-lat').textContent = toDMS(e.latlng.lat, true);
-    document.getElementById('coord-lng').textContent = toDMS(e.latlng.lng, false);
+    perbaruiKoordinatBar(e.latlng);
 });
+
+// 2. UNTUK HP (Layar Sentuh): Baca titik tengah layar saat peta digeser/dicubit
+map.on('move', function() {
+    perbaruiKoordinatBar(map.getCenter());
+});
+
 map.on('zoomend', updateEyeAltitude);
 updateEyeAltitude();
 
