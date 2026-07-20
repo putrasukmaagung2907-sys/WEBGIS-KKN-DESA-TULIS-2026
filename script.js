@@ -31,45 +31,59 @@ map.on('dblclick', function() {
 
 
 // ==========================================
-// 2. SET LOKASI SAYA (GPS REAL-TIME FIX HP)
+// 2. SET LOKASI SAYA (BERDASARKAN QR CODE / URL PARAMETER)
 // ==========================================
 
-// Fungsi untuk memperbarui lokasi saat perangkat mendapat sinyal
-function onLocationFound(e) {
-    currentLat = e.latlng.lat;
-    currentLng = e.latlng.lng;
+// Fungsi pembaca parameter dari URL (?lat=...&lng=...)
+function getUrlParameter(name) {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get(name);
+}
+
+// Menangkap data dari hasil scan QR Code
+const qrLat = getUrlParameter('lat');
+const qrLng = getUrlParameter('lng');
+const qrDusun = getUrlParameter('dusun');
+
+// SKENARIO 1: PENGUNJUNG SCAN BARKODE DARI TIANG
+if (qrLat && qrLng) {
+    currentLat = parseFloat(qrLat);
+    currentLng = parseFloat(qrLng);
     
-    // Jika marker belum ada (baru pertama kali dapat sinyal GPS), maka buat markernya
-    if (!userMarker) {
-        userMarker = L.circleMarker([currentLat, currentLng], {
-            radius: 7, fillColor: "#3498db", color: "#ffffff", weight: 2, fillOpacity: 1, zIndexOffset: 1000
-        }).addTo(map).bindTooltip("Lokasi Anda", { permanent: true, direction: 'right', offset: [5, 0], className: 'label-tempat' });
-    } else {
-        // Jika marker sudah ada, cukup pindahkan posisinya (update pergerakan)
-        userMarker.setLatLng(e.latlng);
+    let namaLabel = qrDusun ? "Posisi Anda (Tiang Dusun " + qrDusun + ")" : "Posisi Anda (Tiang)";
+    
+    // Buat marker statis warna oranye agar beda dengan GPS realtime
+    userMarker = L.circleMarker([currentLat, currentLng], {
+        radius: 8, fillColor: "#e67e22", color: "#ffffff", weight: 2, fillOpacity: 1, zIndexOffset: 1000
+    }).addTo(map).bindTooltip(namaLabel, { permanent: true, direction: 'right', offset: [5, 0], className: 'label-tempat' });
+    
+    // Arahkan pandangan peta langsung menukik ke lokasi tiang tersebut
+    map.setView([currentLat, currentLng], 17);
+
+} 
+// SKENARIO 2: PENGUNJUNG BUKA WEB BIASA (BUKAN DARI SCAN TIANG)
+else {
+    function onLocationFound(e) {
+        currentLat = e.latlng.lat;
+        currentLng = e.latlng.lng;
+        
+        if (!userMarker) {
+            userMarker = L.circleMarker([currentLat, currentLng], {
+                radius: 7, fillColor: "#3498db", color: "#ffffff", weight: 2, fillOpacity: 1, zIndexOffset: 1000
+            }).addTo(map).bindTooltip("Lokasi Anda", { permanent: true, direction: 'right', offset: [5, 0], className: 'label-tempat' });
+        } else {
+            userMarker.setLatLng(e.latlng);
+        }
     }
-}
 
-// Menangani error jika izin lokasi ditolak atau sinyal susah
-function onLocationError(e) {
-    // Pesan error sementara dimatikan untuk timeout agar tidak terus-terusan muncul popup di HP
-    if (e.code !== 3) {
-        console.warn("Akses lokasi terhambat: " + e.message);
+    function onLocationError(e) {
+        if (e.code !== 3) console.warn("GPS terhambat: " + e.message);
     }
+
+    map.on('locationfound', onLocationFound);
+    map.on('locationerror', onLocationError);
+    map.locate({ setView: false, watch: true, enableHighAccuracy: false, maximumAge: 10000, timeout: 30000 });
 }
-
-map.on('locationfound', onLocationFound);
-map.on('locationerror', onLocationError);
-
-// Konfigurasi pelacakan yang lebih ramah untuk HP
-map.locate({ 
-    setView: false, 
-    watch: true, 
-    enableHighAccuracy: false, // Izinkan HP memakai sinyal Tower BTS/Wi-Fi agar super cepat dapat lokasi
-    maximumAge: 10000, 
-    timeout: 30000 // Beri waktu HP 30 detik untuk mencari sinyal
-});
-
 
 // ==========================================
 // 3. MASKING & BATAS ADMINISTRASI 
@@ -308,7 +322,7 @@ map.on('mousemove', function(e) {
     perbaruiKoordinatBar(e.latlng);
 });
 
-// 2. UNTUK HP (Layar Sentuh): Baca titik tengah layar saat peta digeser/dicubit
+// 2. UNTUK HP (Layar Sentuh): Baca titik tengah layar saat peta digeser/cubit
 map.on('move', function() {
     perbaruiKoordinatBar(map.getCenter());
 });
@@ -358,3 +372,96 @@ compassControl.onAdd = function (map) {
     return div;
 };
 compassControl.addTo(map);
+
+// ==========================================
+// 7. FITUR ALAT UKUR PRESISI (LEAFLET-GEOMAN)
+// ==========================================
+
+// Menambahkan panel kontrol digitasi ke kiri atas
+map.pm.addControls({
+    position: 'topleft',
+    drawMarker: false,
+    drawCircleMarker: false,
+    drawPolyline: true,     // Tool ukur jarak (Garis)
+    drawRectangle: false,
+    drawPolygon: true,      // Tool ukur luas (Poligon)
+    drawCircle: false,
+    drawText: false,
+    editMode: false,
+    dragMode: false,
+    cutPolygon: false,
+    removalMode: true       // Tool untuk menghapus hasil ukuran di peta
+});
+
+// Mengaktifkan teks ukuran (metrik) secara otomatis saat kursor diklik & ditarik
+map.pm.setGlobalOptions({ 
+    measurements: { measurement: true, displayFormat: 'metric' },
+    tooltips: true,
+    hintlineStyle: { color: '#e74c3c', dashArray: '5,5' },
+    templineStyle: { color: '#e74c3c' },
+    pathOptions: { color: '#3498db', fillColor: '#3498db', fillOpacity: 0.4 }
+});
+
+
+// ==========================================
+// 8. FITUR LAPOR WARGA (GOOGLE FORMS CROWDSOURCING)
+// ==========================================
+let isReportingMode = false;
+
+// Membuat tombol kontrol custom di peta
+const laporControl = L.control({ position: 'topright' });
+
+laporControl.onAdd = function(map) {
+    const btn = L.DomUtil.create('button', 'lapor-warga-control');
+    btn.innerHTML = '📢 Lapor Cepat';
+    btn.title = 'Klik untuk melaporkan kejadian/masalah di lokasi tertentu';
+    
+    L.DomEvent.on(btn, 'click', function(e) {
+        L.DomEvent.stopPropagation(e); // Cegah peta ikut terklik
+        isReportingMode = !isReportingMode; // Toggle mode on/off
+        
+        if (isReportingMode) {
+            btn.innerHTML = 'Batalkan Lapor ✖';
+            btn.classList.add('active');
+            document.getElementById('map').classList.add('reporting-mode');
+            alert("Mode Lapor Aktif!\nSilakan klik tepat di lokasi masalah pada peta.");
+        } else {
+            btn.innerHTML = '📢 Lapor Cepat';
+            btn.classList.remove('active');
+            document.getElementById('map').classList.remove('reporting-mode');
+        }
+    });
+    
+    return btn;
+};
+laporControl.addTo(map);
+
+// Aksi yang terjadi ketika peta diklik saat mode lapor sedang ON
+map.on('click', function(e) {
+    if (isReportingMode) {
+        const lat = e.latlng.lat.toFixed(6);
+        const lng = e.latlng.lng.toFixed(6);
+        
+        // Popup konfirmasi sebelum dilempar ke Google Forms
+        if(confirm(`Anda akan melaporkan lokasi pada:\nLintang: ${lat}\nBujur: ${lng}\n\nLanjutkan mengisi formulir laporan?`)) {
+            
+            // ============================================================
+            // PERHATIAN: GANTI URL DI BAWAH INI DENGAN LINK GOOGLE FORM ANDA
+            // ============================================================
+            // Format link harus berupa "Pre-filled Link" (Dapatkan tautan yang sudah terisi)
+            // Ganti "entry.111111" dengan ID isian Latitude dan "entry.222222" dengan ID isian Longitude.
+            
+            const formUrl = `https://docs.google.com/forms/d/e/1FAIpQLSfrwrL-MEPQFOiF0iQI94r0ZKtb9r-g7ZEJTj4ABscLoCdoKg/viewform?usp=publish-editor`;
+            
+            // Buka Google Forms di tab baru
+            window.open(formUrl, '_blank');
+            
+            // Matikan mode lapor otomatis setelah klik
+            isReportingMode = false;
+            const btn = document.querySelector('.lapor-warga-control');
+            btn.innerHTML = '📢 Lapor Cepat';
+            btn.classList.remove('active');
+            document.getElementById('map').classList.remove('reporting-mode');
+        }
+    }
+});

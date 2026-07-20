@@ -327,101 +327,90 @@ body, html {
    ========================================== */
 @media (max-width: 768px) {
     /* 1. Sesuaikan Popup */
-    .popup-content { 
-        max-width: 220px; 
-    }
-    .popup-content h3 { 
-        font-size: 13px; 
-    }
-    .popup-gallery { 
-        flex-direction: column; 
-        gap: 5px; 
-    }
-    .popup-gallery figure { 
-        width: 100%; 
-    }
-    .popup-gallery img { 
-        height: 80px; 
-    }
+    .popup-content { max-width: 220px; }
+    .popup-content h3 { font-size: 13px; }
+    .popup-gallery { flex-direction: column; gap: 5px; }
+    .popup-gallery figure { width: 100%; }
+    .popup-gallery img { height: 80px; }
 
     /* 2. Sesuaikan Search Bar agar tidak menabrak tombol zoom */
-    #search-container { 
-        top: 10px; 
-        left: 50px; 
-    }
-    #search-input { 
-        width: 130px; 
-        padding: 6px; 
-        font-size: 11px; 
-    }
-    #search-btn { 
-        padding: 6px 10px; 
-        font-size: 11px; 
-    }
+    #search-container { top: 10px; left: 50px; }
+    #search-input { width: 130px; padding: 6px; font-size: 11px; }
+    #search-btn { padding: 6px 10px; font-size: 11px; }
 
     /* 3. Posisi Filter Kategori */
-    #filter-container { 
-        top: 10px; 
-        right: 10px; 
-    }
-    #filter-toggle-btn { 
-        padding: 6px 10px; 
-        font-size: 11px; 
-    }
+    #filter-container { top: 10px; right: 10px; }
+    #filter-toggle-btn { padding: 6px 10px; font-size: 11px; }
 
     /* 4. Animasi Slide Legenda Khusus Mobile */
-    .leaflet-bottom .leaflet-control.legend-container { 
-        margin-bottom: 75px; 
-    }
-
-    #legend-toggle-btn, .close-legend-btn { 
-        display: block; 
-    }
-
+    .leaflet-bottom .leaflet-control.legend-container { margin-bottom: 75px; }
+    #legend-toggle-btn, .close-legend-btn { display: block; }
     .legend-content {
-        position: absolute;
-        bottom: 0;
-        right: 0;
-        width: max-content;
-        min-width: 170px;
-        transform: translateY(30px); 
-        opacity: 0;
-        visibility: hidden;
-        pointer-events: none;
-        z-index: 1000; 
+        position: absolute; bottom: 0; right: 0; width: max-content; min-width: 170px;
+        transform: translateY(30px); opacity: 0; visibility: hidden; pointer-events: none; z-index: 1000; 
     }
-
-    .legend-container.show .legend-content {
-        transform: translateY(0);
-        opacity: 1;
-        visibility: visible;
-        pointer-events: auto;
-    }
-
-    .legend-container.show #legend-toggle-btn {
-        opacity: 0;
-        visibility: hidden;
-        pointer-events: none;
-    }
+    .legend-container.show .legend-content { transform: translateY(0); opacity: 1; visibility: visible; pointer-events: auto; }
+    .legend-container.show #legend-toggle-btn { opacity: 0; visibility: hidden; pointer-events: none; }
 
     /* 5. Posisi Info Jarak Tempuh di tengah bawah */
-    #route-info { 
-        bottom: 30px; 
-        font-size: 11px; 
-        padding: 6px 15px; 
-        width: max-content; 
-        border-width: 1px;
-    }
-    #route-info b { 
-        font-size: 12px; 
-    }
+    #route-info { bottom: 30px; font-size: 11px; padding: 6px 15px; width: max-content; border-width: 1px; }
+    #route-info b { font-size: 12px; }
 
     /* 6. Status bar diringkas teksnya */
-    #earth-status-bar { 
-        font-size: 9px; 
-        gap: 8px; 
-        justify-content: center; 
-        flex-wrap: wrap; 
-        padding: 3px 5px; 
-    }
+    #earth-status-bar { font-size: 9px; gap: 8px; justify-content: center; flex-wrap: wrap; padding: 3px 5px; }
+}
+
+/* ==========================================
+   FITUR LAPOR WARGA (CROWDSOURCING)
+   ========================================== */
+.lapor-warga-control {
+    background-color: #e74c3c;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 4px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    font-weight: bold;
+    font-size: 13px;
+    cursor: pointer;
+    border: 2px solid #c0392b;
+    transition: all 0.3s ease;
+    margin-top: 10px;
+    margin-right: 10px;
+}
+
+.lapor-warga-control:hover {
+    background-color: #c0392b;
+}
+
+/* Tampilan saat tombol Lapor aktif ditekan */
+.lapor-warga-control.active {
+    background-color: #f1c40f;
+    color: #2c3e50;
+    border-color: #f39c12;
+    animation: pulse-border 1.5s infinite;
+}
+
+@keyframes pulse-border {
+    0% { box-shadow: 0 0 0 0 rgba(241, 196, 15, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(241, 196, 15, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(241, 196, 15, 0); }
+}
+
+/* Mengubah kursor jadi bidikan (crosshair) saat warga mau klik titik di peta */
+.leaflet-container.reporting-mode {
+    cursor: crosshair !important;
+}
+
+/* Perbaikan posisi panel kontrol measure bawaan */
+.leaflet-control-measure {
+    border-radius: 4px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3) !important;
+    border: none !important;
+}
+
+/* Menggeser wadah tombol Lapor agar tidak tertumpuk Filter Kategori */
+.leaflet-top.leaflet-right {
+    margin-top: 55px; 
+    margin-right: 5px;
 }
