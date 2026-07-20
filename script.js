@@ -416,21 +416,61 @@ map.on('pm:create', function(e) {
     // Izinkan garis/poligon yang BARU digambar ini untuk bisa dihapus oleh user
     layer.options.pmIgnore = false; 
     
-    // Coba ambil teks ukuran dari sistem Geoman (biasanya berupa m, km, atau ha)
+    // Coba ambil teks ukuran dari sistem Geoman (jika berhasil)
     var hasilUkuran = "";
     if (layer.getTooltip && layer.getTooltip()) {
         hasilUkuran = layer.getTooltip().getContent();
     }
 
-    // Fallback: Jika Geoman gagal memunculkan teks saat garis selesai ditarik,
-    // kita hitung jaraknya secara otomatis menggunakan algoritma Leaflet murni.
+    // FALLBACK 1: Jika menggambar GARIS (Jarak)
     if (e.shape === 'Line' && (!hasilUkuran || hasilUkuran === "")) {
         var latlngs = layer.getLatLngs();
         var distance = 0;
         for (var i = 0; i < latlngs.length - 1; i++) {
             distance += latlngs[i].distanceTo(latlngs[i + 1]);
         }
-        hasilUkuran = distance > 1000 ? (distance/1000).toFixed(2) + " km" : Math.round(distance) + " meter";
+        
+        var distanceMeter = Math.round(distance).toLocaleString('id-ID');
+        
+        // Tampilkan Kilometer dan Meter jika jaraknya jauh
+        if (distance >= 1000) {
+            var distanceKm = (distance / 1000).toFixed(2);
+            hasilUkuran = distanceKm + " km<br><span style='font-size:12px; font-weight:normal;'>(" + distanceMeter + " meter)</span>";
+        } else {
+            hasilUkuran = distanceMeter + " meter";
+        }
+    }
+
+    // FALLBACK 2: Jika menggambar POLIGON (Luas Area)
+    if (e.shape === 'Polygon' && (!hasilUkuran || hasilUkuran === "")) {
+        // Mengambil titik sudut luar poligon
+        var latlngs = layer.getLatLngs()[0]; 
+        var area = 0;
+        
+        var d2r = Math.PI / 180; 
+        var R = 6378137; // Jari-jari bumi
+        
+        if (latlngs.length > 2) {
+            for (var i = 0; i < latlngs.length; i++) {
+                var p1 = latlngs[i];
+                var p2 = latlngs[(i + 1) % latlngs.length];
+                area += ((p2.lng - p1.lng) * d2r) *
+                        (2 + Math.sin(p1.lat * d2r) + Math.sin(p2.lat * d2r));
+            }
+            area = Math.abs(area * R * R / 2.0);
+        }
+
+        // Format angka dengan titik sebagai pemisah ribuan (contoh: 15.000)
+        var areaMeter = Math.round(area).toLocaleString('id-ID');
+
+        // Tampilkan Hektar dan Meter Persegi sekaligus jika luas > 10.000
+        if (area >= 10000) {
+            var areaHektar = (area / 10000).toFixed(2);
+            hasilUkuran = areaHektar + " ha<br><span style='font-size:12px; font-weight:normal;'>(" + areaMeter + " meter persegi)</span>";
+        } else {
+            // Tampilkan hanya meter persegi jika lahan lebih kecil dari 1 hektar
+            hasilUkuran = areaMeter + " meter persegi"; 
+        }
     }
 
     // Ikat hasil ukuran ke dalam Popup lalu buka secara otomatis
@@ -442,7 +482,7 @@ map.on('pm:create', function(e) {
             "</div>"
         ).openPopup();
     } else {
-        layer.bindPopup("<b>Area berhasi dipetakan.</b>").openPopup();
+        layer.bindPopup("<b>Area berhasil dipetakan.</b>").openPopup();
     }
 });
 
