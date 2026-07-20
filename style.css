@@ -304,3 +304,22 @@ body, html { margin: 0; padding: 0; height: 100%; font-family: 'Segoe UI', Tahom
     #route-info { font-size: 12px; padding: 8px 15px; bottom: 50px; width: 80%; text-align: center; }
     #filter-container { top: 60px; right: 10px; }
 }
+/* Styling untuk Tombol Lihat Detail di Popup */
+.btn-detail-popup {
+    background-color: #2b7944;
+    color: white;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 5px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    transition: background 0.3s ease;
+}
+
+.btn-detail-popup:hover {
+    background-color: #4818c0;
+}

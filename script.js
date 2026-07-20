@@ -78,7 +78,6 @@ L.geoJSON(batasDesaData, {
 // ==========================================
 // 4. GROUPING, FILTERING & MARKER CLUSTER
 // ==========================================
-// Mengganti L.layerGroup() menjadi L.markerClusterGroup() agar rapi
 const layerGroups = {
     "Pusat Pemerintahan": L.markerClusterGroup().addTo(map),
     "Fasilitas Ibadah": L.markerClusterGroup().addTo(map),
@@ -104,14 +103,60 @@ function getMarkerColor(kategori) {
 // Data Array untuk Search
 let searchData = [];
 
+// FUNGSI BANTUAN UNTUK GENERATE HTML POPUP AWAL (SIMPEL)
+// PERHATIKAN: Menambahkan kata 'event' di dalam parameter onclick
+function getPopupAwalHTML(index) {
+    const loc = locations[index];
+    return `
+        <div class="popup-content" style="text-align: center; min-width: 150px;">
+            <h3 style="margin-bottom: 8px; border-bottom: 2px solid #e74c3c; padding-bottom: 5px;">${loc.name}</h3>
+            <button class="btn-detail-popup" onclick="window.tampilkanDetailBaru(${index}, event)">Detail⬇️</button>
+        </div>
+    `;
+}
+
 locations.forEach((loc, index) => {
-    // Generate tombol WA dinamis
+    const markerColor = getMarkerColor(loc.type);
+    const marker = L.circleMarker([loc.lat, loc.lng], {
+        radius: 6, fillColor: markerColor, color: "#ffffff", weight: 1.5, fillOpacity: 1
+    })
+    .bindTooltip(loc.name, { permanent: false, direction: 'top', className: 'label-tempat' })
+    .bindPopup(getPopupAwalHTML(index)); // Ikat popup awal
+
+    if(layerGroups[loc.type]) { marker.addTo(layerGroups[loc.type]); } 
+    
+    // Simpan referensi marker
+    searchData.push({ name: loc.name.toLowerCase(), marker: marker, lat: loc.lat, lng: loc.lng });
+
+    // Reset popup ke tampilan awal jika disilang/ditutup
+    marker.on('popupclose', function() {
+        setTimeout(() => {
+            marker.setPopupContent(getPopupAwalHTML(index));
+        }, 300); // Jeda agar perubahan tidak terlihat berkedip saat popup memudar menutup
+    });
+});
+
+// ==========================================
+// FUNGSI GLOBAL UNTUK BERALIH POPUP
+// ==========================================
+
+// Fungsi Beralih ke Popup Detail
+window.tampilkanDetailBaru = function(index, event) {
+    if (event) {
+        event.stopPropagation(); // Mencegah klik tembus ke peta dan menutup popup
+        event.preventDefault();
+    }
+
+    const loc = locations[index];
+    const marker = searchData[index].marker;
     let waButtonHTML = loc.whatsapp ? `<a href="https://wa.me/${loc.whatsapp}" target="_blank" class="wa-btn">💬 Chat Pemilik/Admin</a>` : '';
     
-    const popupHTML = `
-        <div class="popup-content" style="position: relative; padding-bottom: 40px;">
-            <h3>${loc.name}</h3>
-            <div class="popup-gallery">
+    // Generate HTML untuk konten detail lengkap
+    // PERHATIKAN: Tombol kembali dan navigasi juga diberi parameter 'event'
+    const detailHTML = `
+        <div class="popup-content" style="position: relative; min-width: 220px; text-align: left;">
+            <h3 style="margin-bottom: 5px; border-bottom: 2px solid #e74c3c; padding-bottom: 5px;">${loc.name}</h3>
+            <div class="popup-gallery" style="margin-top: 10px;">
                 <figure><img src="${loc.imgBangunan}" onerror="this.src='https://via.placeholder.com/150'"><figcaption>Tampak Depan</figcaption></figure>
                 <figure><img src="${loc.imgOrang}" onerror="this.src='https://via.placeholder.com/150'"><figcaption>Penanggung Jawab</figcaption></figure>
             </div>
@@ -120,67 +165,76 @@ locations.forEach((loc, index) => {
             <p><strong>Info:</strong> ${loc.desc}</p>
             ${waButtonHTML}
             
-            <!-- Tombol Rute -->
-            <button id="btn-route-${index}" title="Navigasi ke Sini" style="position: absolute; bottom: 0; right: 0; background-color: #3498db; color: white; border: none; border-radius: 50%; width: 36px; height: 36px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="3 11 22 2 13 21 11 13 3 11"></polygon></svg>
-            </button>
+            <!-- Area Tombol Aksi Bawah -->
+            <div style="margin-top: 15px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #bdc3c7; padding-top: 8px;">
+                <button onclick="window.kembaliKeAwal(${index}, event)" style="background: #7f8c8d; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold;">⬅️ Kembali</button>
+                
+                <button onclick="window.buatRute(${index}, event)" title="Navigasi ke Sini" style="background-color: #3498db; color: white; border: none; border-radius: 50%; width: 34px; height: 34px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="3 11 22 2 13 21 11 13 3 11"></polygon></svg>
+                </button>
+            </div>
         </div>
     `;
-
-    const markerColor = getMarkerColor(loc.type);
-    const marker = L.circleMarker([loc.lat, loc.lng], {
-        radius: 6, fillColor: markerColor, color: "#ffffff", weight: 1.5, fillOpacity: 1
-    })
-    .bindTooltip(loc.name, { permanent: false, direction: 'top', className: 'label-tempat' }) // Diubah jadi false agar rapi di cluster
-    .bindPopup(popupHTML);
-
-    if(layerGroups[loc.type]) { marker.addTo(layerGroups[loc.type]); } 
     
-    // Simpan referensi marker untuk fitur search
-    searchData.push({ name: loc.name.toLowerCase(), marker: marker, lat: loc.lat, lng: loc.lng });
+    // Perintahkan Leaflet untuk menukar isi konten
+    marker.setPopupContent(detailHTML);
+};
 
-    marker.on('popupopen', function() {
-        const routeBtn = document.getElementById(`btn-route-${index}`);
-        if (routeBtn) {
-            routeBtn.addEventListener('click', function() {
-                if (routingControl) map.removeControl(routingControl);
-                const infoPanel = document.getElementById('route-info');
-                if (infoPanel) { infoPanel.innerHTML = "Menghitung rute..."; infoPanel.style.display = 'block'; }
+// Fungsi Beralih Kembali ke Popup Awal
+window.kembaliKeAwal = function(index, event) {
+    if (event) {
+        event.stopPropagation();
+        event.preventDefault();
+    }
+    searchData[index].marker.setPopupContent(getPopupAwalHTML(index));
+};
 
-                routingControl = L.Routing.control({
-                    waypoints: [ L.latLng(currentLat, currentLng), L.latLng(loc.lat, loc.lng) ], // Dari lokasi saat ini
-                    router: L.Routing.osrmv1({ language: 'id', profile: 'driving' }),
-                    addWaypoints: false, 
-                    routeLine: function(route, options) {
-                        return L.Routing.line(route, { addWaypoints: false, extendToWaypoints: true, styles: [{ color: '#0ec733', opacity: 0.9, weight: 8 }] });
-                    },
-                    createMarker: function() { return null; }, fitSelectedRoutes: true, show: false 
-                }).addTo(map);
+// Fungsi navigasi rute
+window.buatRute = function(index, event) {
+    if (event) {
+        event.stopPropagation();
+        event.preventDefault();
+    }
 
-                routingControl.on('routesfound', function(e) {
-                    const distanceMeters = e.routes[0].summary.totalDistance;
-                    let distanceString = distanceMeters > 1000 ? (distanceMeters / 1000).toFixed(2) + ' km' : Math.round(distanceMeters) + ' meter';
-                    if (infoPanel) infoPanel.innerHTML = "Jarak Tempuh: <b>" + distanceString + "</b>";
-                });
-            });
-        }
+    const loc = locations[index];
+    if (routingControl) map.removeControl(routingControl);
+    
+    const infoPanel = document.getElementById('route-info');
+    if (infoPanel) { infoPanel.innerHTML = "Menghitung rute..."; infoPanel.style.display = 'block'; }
+
+    routingControl = L.Routing.control({
+        waypoints: [ L.latLng(currentLat, currentLng), L.latLng(loc.lat, loc.lng) ], 
+        router: L.Routing.osrmv1({ language: 'id', profile: 'driving' }),
+        addWaypoints: false, 
+        routeLine: function(route, options) {
+            return L.Routing.line(route, { addWaypoints: false, extendToWaypoints: true, styles: [{ color: '#0ec733', opacity: 0.9, weight: 8 }] });
+        },
+        createMarker: function() { return null; }, fitSelectedRoutes: true, show: false 
+    }).addTo(map);
+
+    routingControl.on('routesfound', function(e) {
+        const distanceMeters = e.routes[0].summary.totalDistance;
+        let distanceString = distanceMeters > 1000 ? (distanceMeters / 1000).toFixed(2) + ' km' : Math.round(distanceMeters) + ' meter';
+        if (infoPanel) infoPanel.innerHTML = "Jarak Tempuh: <b>" + distanceString + "</b>";
     });
-});
+};
 
-// Fitur Pencarian Kustom
+
+// ==========================================
+// FITUR SEARCH & FILTER PANEL
+// ==========================================
 document.getElementById('search-btn').addEventListener('click', function() {
     let query = document.getElementById('search-input').value.toLowerCase();
     let found = searchData.find(item => item.name.includes(query));
     
     if(found && query !== "") {
         map.flyTo([found.lat, found.lng], 18, { animate: true, duration: 1.5 });
-        setTimeout(() => found.marker.openPopup(), 1500); // Buka popup otomatis
+        setTimeout(() => found.marker.openPopup(), 1500);
     } else {
         alert("Lokasi tidak ditemukan! Pastikan nama tepat.");
     }
 });
 
-// Filter Panel Logic
 document.querySelectorAll('.filter-btn').forEach(btn => {
     btn.addEventListener('click', function() {
         const category = this.getAttribute('data-category');
