@@ -274,20 +274,46 @@ updateEyeAltitude();
 
 
 // ==========================================
-// 6. LEGENDA & KOMPAS
+// 6. LEGENDA, KOMPAS, & FUNGSI TOGGLE
 // ==========================================
+
+// Fungsi Global untuk Slide Animasi Legenda di HP
+window.toggleLegenda = function(event) {
+    if (event) {
+        event.stopPropagation();
+        event.preventDefault();
+    }
+    const legendContainer = document.querySelector('.legend-container');
+    if (legendContainer) {
+        legendContainer.classList.toggle('show');
+    }
+};
+
 const legend = L.control({ position: 'bottomright' });
 legend.onAdd = function (map) {
-    const div = L.DomUtil.create('div', 'info legend');
+    // Ubah nama class utama menjadi legend-container
+    const div = L.DomUtil.create('div', 'info legend-container');
     const categories = ["Pusat Pemerintahan", "Fasilitas Ibadah", "Fasilitas Kesehatan", "Fasilitas Pendidikan", "UMKM", "Keamanan Lingkungan"];
     
-    div.innerHTML += '<h4>Legenda</h4>';
-    categories.forEach(cat => { div.innerHTML += `<i style="background:${getMarkerColor(cat)}"></i> ${cat}<br>`; });
-    div.innerHTML += '<i style="background:#3498db"></i> Lokasi Anda<br>';
-    div.innerHTML += '<hr style="border: 0; border-top: 1px solid #7f8c8d; margin: 8px 0;">';
-    div.innerHTML += '<i style="background:#2c12f3; height: 4px; margin-top: 7px; border-radius: 0;"></i> Jalan Pantura<br>';
-    div.innerHTML += '<i style="background:#c9a01a; height: 2px; margin-top: 8px; border-radius: 0;"></i> Jalan Desa<br>';
-    div.innerHTML += '<i style="background: transparent; border-top: 3px dashed #b1aeae; height: 0; margin-top: 8px; border-radius: 0;"></i> Batas Administrasi<br>';
+    // 1. Kotak Konten Legenda
+    let content = '<div class="legend-content">';
+    content += '<h4>Legenda <button class="close-legend-btn" onclick="window.toggleLegenda(event)">✖</button></h4>';
+    categories.forEach(cat => { content += `<i style="background:${getMarkerColor(cat)}"></i> ${cat}<br>`; });
+    content += '<i style="background:#3498db"></i> Lokasi Anda<br>';
+    content += '<hr style="border: 0; border-top: 1px solid #7f8c8d; margin: 8px 0;">';
+    content += '<i style="background:#2c12f3; height: 4px; margin-top: 7px; border-radius: 0;"></i> Jalan Pantura<br>';
+    content += '<i style="background:#c9a01a; height: 2px; margin-top: 8px; border-radius: 0;"></i> Jalan Desa<br>';
+    content += '<i style="background: transparent; border-top: 3px dashed #b1aeae; height: 0; margin-top: 8px; border-radius: 0;"></i> Batas Administrasi<br>';
+    content += '</div>';
+
+    // 2. Tombol Buka Legenda (Hanya akan muncul di HP via CSS)
+    let btn = '<button id="legend-toggle-btn" onclick="window.toggleLegenda(event)">📜 Legenda</button>';
+
+    div.innerHTML = btn + content;
+    
+    // Mencegah klik di area legenda tembus ke peta (Mencegah fitur Leaflet error)
+    L.DomEvent.disableClickPropagation(div);
+
     return div;
 };
 legend.addTo(map);
