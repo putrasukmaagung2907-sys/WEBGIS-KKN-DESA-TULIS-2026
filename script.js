@@ -377,7 +377,14 @@ compassControl.addTo(map);
 // 7. FITUR ALAT UKUR PRESISI (LEAFLET-GEOMAN)
 // ==========================================
 
-// Menambahkan panel kontrol digitasi ke kiri atas
+// 1. KUNCI LAYER BAWAAN (Batas Administrasi & Marker Lama)
+// Script ini membuat alat hapus Geoman mengabaikan semua layer yang sudah ada di peta,
+// sehingga batas desa Anda tidak akan ikut terhapus.
+map.eachLayer(function(layer) {
+    layer.options.pmIgnore = true;
+});
+
+// 2. TAMBAHKAN KONTROL DIGITASI
 map.pm.addControls({
     position: 'topleft',
     drawMarker: false,
@@ -390,16 +397,53 @@ map.pm.addControls({
     editMode: false,
     dragMode: false,
     cutPolygon: false,
-    removalMode: true       // Tool untuk menghapus hasil ukuran di peta
+    removalMode: true       // Tool hapus
 });
 
-// Mengaktifkan teks ukuran (metrik) secara otomatis saat kursor diklik & ditarik
+// 3. KONFIGURASI VISUAL & SISTEM METRIK
 map.pm.setGlobalOptions({ 
     measurements: { measurement: true, displayFormat: 'metric' },
     tooltips: true,
     hintlineStyle: { color: '#e74c3c', dashArray: '5,5' },
     templineStyle: { color: '#e74c3c' },
     pathOptions: { color: '#3498db', fillColor: '#3498db', fillOpacity: 0.4 }
+});
+
+// 4. MUNCULKAN POPUP UKURAN PERMANEN SETELAH SELESAI MENGGAMBAR
+map.on('pm:create', function(e) {
+    var layer = e.layer;
+    
+    // Izinkan garis/poligon yang BARU digambar ini untuk bisa dihapus oleh user
+    layer.options.pmIgnore = false; 
+    
+    // Coba ambil teks ukuran dari sistem Geoman (biasanya berupa m, km, atau ha)
+    var hasilUkuran = "";
+    if (layer.getTooltip && layer.getTooltip()) {
+        hasilUkuran = layer.getTooltip().getContent();
+    }
+
+    // Fallback: Jika Geoman gagal memunculkan teks saat garis selesai ditarik,
+    // kita hitung jaraknya secara otomatis menggunakan algoritma Leaflet murni.
+    if (e.shape === 'Line' && (!hasilUkuran || hasilUkuran === "")) {
+        var latlngs = layer.getLatLngs();
+        var distance = 0;
+        for (var i = 0; i < latlngs.length - 1; i++) {
+            distance += latlngs[i].distanceTo(latlngs[i + 1]);
+        }
+        hasilUkuran = distance > 1000 ? (distance/1000).toFixed(2) + " km" : Math.round(distance) + " meter";
+    }
+
+    // Ikat hasil ukuran ke dalam Popup lalu buka secara otomatis
+    if (hasilUkuran) {
+        layer.bindPopup(
+            "<div style='font-size:14px; text-align:center; padding:5px;'>" +
+            "<span style='color:#7f8c8d; font-size:12px; display:block; margin-bottom:3px;'>Hasil Ukuran:</span>" +
+            "<b>" + hasilUkuran + "</b>" +
+            "</div>"
+        ).openPopup();
+    } else {
+        layer.bindPopup("<b>Area berhasi dipetakan.</b>").openPopup();
+    }
 });
 
 
