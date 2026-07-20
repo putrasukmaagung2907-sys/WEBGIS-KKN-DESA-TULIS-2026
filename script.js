@@ -14,8 +14,9 @@ L.control.layers({
 }, null, { position: 'topleft' }).addTo(map);
 
 let routingControl = null;
-let currentLat = -6.950677; // Default awal jika GPS mati
-let currentLng = 109.788766;
+let currentLat = null; 
+let currentLng = null;
+let userMarker = null; // Marker biru belum dibuat sebelum lokasi nyata ditemukan
 
 map.on('dblclick', function() {
     if (routingControl) {
@@ -38,50 +39,38 @@ const userMarker = L.circleMarker([currentLat, currentLng], {
 
 // Fungsi untuk memperbarui lokasi saat perangkat bergerak
 function onLocationFound(e) {
-    currentLat = e.latlng.lat; // Memperbarui variabel lokasi saat ini
+    currentLat = e.latlng.lat;
     currentLng = e.latlng.lng;
     
-    // Memindahkan marker ke lokasi terbaru
-    userMarker.setLatLng(e.latlng);
-    
-    // Update tooltip
-    userMarker.bindPopup("<b>Lokasi Anda Saat Ini</b>").openPopup();
-}
-
-// Menangani error jika izin lokasi ditolak
-function onLocationError(e) {
-    let pesan = "Lokasi tidak dapat diakses.\n\n";
-    switch (e.code) {
-        case 1: // PERMISSION_DENIED
-            pesan += "Izin lokasi ditolak. Cek 3 tempat ini di HP:\n" +
-                     "1) Pengaturan sistem HP > Lokasi (aktifkan)\n" +
-                     "2) Pengaturan aplikasi Chrome > Izin > Lokasi (Izinkan)\n" +
-                     "3) Ikon gembok di address bar Chrome > Izin situs > Lokasi (Izinkan)";
-            break;
-        case 2: // POSITION_UNAVAILABLE
-            pesan += "Sinyal GPS tidak ditemukan. Coba pindah ke luar ruangan / tempat terbuka, dan pastikan mode lokasi HP diset ke 'Akurasi Tinggi'.";
-            break;
-        case 3: // TIMEOUT
-            pesan += "Waktu pencarian lokasi habis (sinyal GPS lambat). Coba lagi di tempat dengan sinyal lebih baik.";
-            break;
-        default:
-            pesan += "Penyebab tidak diketahui (kode error: " + e.code + ").";
+    // Jika marker belum ada (baru pertama kali dapat sinyal GPS), maka buat markernya
+    if (!userMarker) {
+        userMarker = L.circleMarker([currentLat, currentLng], {
+            radius: 7, fillColor: "#3498db", color: "#ffffff", weight: 2, fillOpacity: 1, zIndexOffset: 1000
+        }).addTo(map).bindTooltip("Lokasi Anda", { permanent: true, direction: 'right', offset: [5, 0], className: 'label-tempat' });
+    } else {
+        // Jika marker sudah ada, cukup pindahkan posisinya (update pergerakan)
+        userMarker.setLatLng(e.latlng);
     }
-    alert(pesan);
-    console.error("Geolocation error:", e.code, e.message);
 }
 
-// Konfigurasi pelacakan (watch: true berarti akan terus melacak pergerakan)
+// Menangani error jika izin lokasi ditolak atau sinyal susah
+function onLocationError(e) {
+    // Pesan error sementara dimatikan untuk timeout agar tidak terus-terusan muncul popup (spam) di HP pengguna
+    if (e.code !== 3) {
+        console.warn("Akses lokasi terhambat: " + e.message);
+    }
+}
+
 map.on('locationfound', onLocationFound);
 map.on('locationerror', onLocationError);
 
-// Menjalankan pelacakan dengan akurasi tinggi
+// Konfigurasi pelacakan yang lebih ramah untuk HP
 map.locate({ 
     setView: false, 
     watch: true, 
-    enableHighAccuracy: true, 
-    maximumAge: 5000, 
-    timeout: 10000 
+    enableHighAccuracy: false, // UBAH KE FALSE: Izinkan HP memakai sinyal Tower BTS/Wi-Fi agar super cepat dapat lokasi tanpa menunggu satelit
+    maximumAge: 10000, 
+    timeout: 30000 // PERPANJANG TIMEOUT: Beri waktu HP 30 detik untuk berpikir, bukan 10 detik
 });
 
 
@@ -228,10 +217,17 @@ window.kembaliKeAwal = function(index, event) {
 };
 
 // Fungsi navigasi rute
+// Fungsi navigasi rute
 window.buatRute = function(index, event) {
     if (event) {
         event.stopPropagation();
         event.preventDefault();
+    }
+
+    // TAMBAHAN BARU: Cek apakah sinyal GPS sudah didapat
+    if (!currentLat || !currentLng) {
+        alert("Mohon tunggu sebentar, sistem sedang mencari titik lokasi GPS Anda...");
+        return; // Hentikan proses pembuatan rute agar tidak error
     }
 
     const loc = locations[index];
