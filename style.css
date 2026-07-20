@@ -294,7 +294,9 @@ body, html { margin: 0; padding: 0; height: 100%; font-family: 'Segoe UI', Tahom
 /* ==========================================
    Styling Legenda Dinamis
    ========================================== */
-.legend-content {
+.legend-container {
+    position: relative;}
+   .legend-content {
     background: rgba(44, 62, 80, 0.95);
     padding: 10px 15px;
     color: white;
@@ -390,17 +392,13 @@ body, html { margin: 0; padding: 0; height: 100%; font-family: 'Segoe UI', Tahom
         font-size: 11px; 
     }
 
-    /* 4. Animasi Slide Legenda Khusus Mobile */
+/* 4. Animasi Slide Legenda Khusus Mobile */
     .leaflet-bottom .leaflet-control.legend-container { 
         margin-bottom: 75px; 
     }
 
-    #legend-toggle-btn { 
-        display: block; /* Munculkan tombol utama */
-    }
-    
-    .close-legend-btn {
-        display: block; /* Munculkan tombol silang X */
+    #legend-toggle-btn, .close-legend-btn { 
+        display: block; 
     }
 
     .legend-content {
@@ -408,11 +406,12 @@ body, html { margin: 0; padding: 0; height: 100%; font-family: 'Segoe UI', Tahom
         bottom: 0;
         right: 0;
         width: max-content;
-        /* Kondisi Awal: Tersembunyi dengan digeser ke bawah 30px dan transparan */
+        min-width: 170px; /* Mencegah kotak menyusut tak beraturan di HP lama */
         transform: translateY(30px); 
         opacity: 0;
         visibility: hidden;
         pointer-events: none;
+        z-index: 1000; /* Mencegah legenda tertumpuk elemen peta lain */
     }
 
     /* Kondisi Akhir: Saat Legenda Diklik (Animasi Slide Masuk) */

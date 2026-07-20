@@ -277,12 +277,8 @@ updateEyeAltitude();
 // 6. LEGENDA, KOMPAS, & FUNGSI TOGGLE
 // ==========================================
 
-// Fungsi Global untuk Slide Animasi Legenda di HP
-window.toggleLegenda = function(event) {
-    if (event) {
-        event.stopPropagation();
-        event.preventDefault();
-    }
+// Fungsi Global untuk Slide Animasi Legenda di HP (Versi Fix HP)
+window.toggleLegenda = function() {
     const legendContainer = document.querySelector('.legend-container');
     if (legendContainer) {
         legendContainer.classList.toggle('show');
@@ -291,13 +287,12 @@ window.toggleLegenda = function(event) {
 
 const legend = L.control({ position: 'bottomright' });
 legend.onAdd = function (map) {
-    // Ubah nama class utama menjadi legend-container
     const div = L.DomUtil.create('div', 'info legend-container');
     const categories = ["Pusat Pemerintahan", "Fasilitas Ibadah", "Fasilitas Kesehatan", "Fasilitas Pendidikan", "UMKM", "Keamanan Lingkungan"];
     
     // 1. Kotak Konten Legenda
     let content = '<div class="legend-content">';
-    content += '<h4>Legenda <button class="close-legend-btn" onclick="window.toggleLegenda(event)">✖</button></h4>';
+    content += '<h4>Legenda <button type="button" class="close-legend-btn" onclick="window.toggleLegenda()">✖</button></h4>';
     categories.forEach(cat => { content += `<i style="background:${getMarkerColor(cat)}"></i> ${cat}<br>`; });
     content += '<i style="background:#3498db"></i> Lokasi Anda<br>';
     content += '<hr style="border: 0; border-top: 1px solid #7f8c8d; margin: 8px 0;">';
@@ -306,13 +301,11 @@ legend.onAdd = function (map) {
     content += '<i style="background: transparent; border-top: 3px dashed #b1aeae; height: 0; margin-top: 8px; border-radius: 0;"></i> Batas Administrasi<br>';
     content += '</div>';
 
-    // 2. Tombol Buka Legenda (Hanya akan muncul di HP via CSS)
-    let btn = '<button id="legend-toggle-btn" onclick="window.toggleLegenda(event)">📜 Legenda</button>';
+    // 2. Tombol Buka Legenda (Ditambah type="button")
+    let btn = '<button type="button" id="legend-toggle-btn" onclick="window.toggleLegenda()">📜 Legenda</button>';
 
     div.innerHTML = btn + content;
-    
-    // Mencegah klik di area legenda tembus ke peta (Mencegah fitur Leaflet error)
-    L.DomEvent.disableClickPropagation(div);
+    L.DomEvent.disableClickPropagation(div); // Leaflet sudah otomatis memblokir klik tembus ke peta di sini
 
     return div;
 };
