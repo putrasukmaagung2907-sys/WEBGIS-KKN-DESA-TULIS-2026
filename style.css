@@ -299,27 +299,87 @@ body, html { margin: 0; padding: 0; height: 100%; font-family: 'Segoe UI', Tahom
 
 /* Media Query untuk Responsivitas Mobile */
 @media (max-width: 768px) {
-    #search-input { width: 140px; }
-    #earth-status-bar { font-size: 10px; gap: 8px; flex-wrap: wrap; }
-    #route-info { font-size: 12px; padding: 8px 15px; bottom: 50px; width: 80%; text-align: center; }
-    #filter-container { top: 60px; right: 10px; }
-}
-/* Styling untuk Tombol Lihat Detail di Popup */
-.btn-detail-popup {
-    background-color: #2b7944;
-    color: white;
-    border: none;
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-size: 12px;
-    font-weight: bold;
-    cursor: pointer;
-    width: 100%;
-    margin-top: 5px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    transition: background 0.3s ease;
-}
+    /* 1. Sesuaikan Popup & Tumpuk Gambar ke Bawah */
+    .popup-content { 
+        max-width: 220px; 
+    }
+    .popup-content h3 { 
+        font-size: 13px; 
+    }
+    .popup-gallery { 
+        flex-direction: column; /* Mengubah gambar jadi atas-bawah */
+        gap: 5px; 
+    }
+    .popup-gallery figure { 
+        width: 100%; 
+    }
+    .popup-gallery img { 
+        height: 80px; 
+    }
 
-.btn-detail-popup:hover {
-    background-color: #4818c0;
+    /* 2. Sesuaikan Search Bar agar tidak menabrak tombol zoom */
+    #search-container { 
+        top: 10px; 
+        left: 50px; 
+    }
+    #search-input { 
+        width: 130px; 
+        padding: 6px; 
+        font-size: 11px; 
+    }
+    #search-btn { 
+        padding: 6px 10px; 
+        font-size: 11px; 
+    }
+
+    /* 3. Posisi Filter Kategori agar proporsional */
+    #filter-container { 
+        top: 10px; 
+        right: 10px; 
+    }
+    #filter-toggle-btn { 
+        padding: 6px 10px; 
+        font-size: 11px; 
+    }
+
+    /* 4. Kecilkan ukuran Legenda dan amankan dari panel Jarak */
+    .legend { 
+        font-size: 10px; 
+        padding: 6px 8px; 
+        line-height: 1.2; 
+    }
+    .legend h4 { 
+        font-size: 11px; 
+        margin-bottom: 4px; 
+        padding-bottom: 2px; 
+    }
+    .legend i { 
+        width: 10px; 
+        height: 10px; 
+        margin-top: 1px; 
+    }
+    .leaflet-bottom .leaflet-control.legend { 
+        margin-bottom: 75px; /* Dorong legenda ke atas agar tidak nabrak jarak tempuh */
+    }
+
+    /* 5. Posisi Info Jarak Tempuh di tengah bawah */
+    #route-info { 
+        bottom: 30px; 
+        font-size: 11px; 
+        padding: 6px 15px; 
+        width: max-content; 
+        border-width: 1px;
+    }
+    #route-info b { 
+        font-size: 12px; 
+    }
+
+    /* 6. Status bar diringkas teksnya */
+    #earth-status-bar { 
+        font-size: 9px; 
+        gap: 8px; 
+        justify-content: center; 
+        flex-wrap: wrap; 
+        padding: 3px 5px; 
+    }
 }

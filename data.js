@@ -23,7 +23,7 @@ const batasDesaData = {
 
 const locations = [
     {
-        name: "Balai Desa Tulis", lat: -6.950, lng: 109.788, type: "Pusat Pemerintahan",
+        name: "Balai Desa Tulis", lat: -6.948722, lng: 109.793935, type: "Pusat Pemerintahan",
         desc: "Pusat administrasi dan pelayanan masyarakat Desa Tulis.",
         jamOperasional: "Senin - Jumat (08:00 - 15:00)",
         whatsapp: "", // Kosongkan jika tidak ada
@@ -37,7 +37,7 @@ const locations = [
         imgBangunan: "art galerry.png", imgOrang: "art galerry.png"
     },
     {
-        name: "SDN Tulis 01", lat: -6.948, lng: 109.789, type: "Fasilitas Pendidikan",
+        name: "SDN Tulis 01", lat: -6.949718, lng: 109.788332, type: "Fasilitas Pendidikan",
         desc: "Sekolah Dasar Negeri utama di Desa Tulis.",
         jamOperasional: "Senin - Sabtu (07:00 - 14:00)",
         whatsapp: "",
