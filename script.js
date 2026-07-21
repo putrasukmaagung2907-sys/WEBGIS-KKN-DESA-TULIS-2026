@@ -196,7 +196,7 @@ window.tampilkanDetailBaru = function(index, event) {
         let nomorWA = loc.whatsapp;
         
         // Otomatis ubah angka "0" di depan menjadi "62" agar valid di API WhatsApp
-        if (nomorWA.startsWith('0')) {
+        if (nomorWA.startsWith('62')) {
             nomorWA = '62' + nomorWA.substring(1);
         }
         
