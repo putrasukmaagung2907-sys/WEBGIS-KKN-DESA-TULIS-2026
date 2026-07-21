@@ -189,13 +189,15 @@ window.tampilkanDetailBaru = function(index, event) {
     const marker = searchData[index].marker;
     let waButtonHTML = loc.whatsapp ? `<a href="https://wa.me/${loc.whatsapp}" target="_blank" class="wa-btn">💬 Chat Pemilik/Admin</a>` : '';
     
+    // PERUBAHAN: Menghapus tag <figure> gambar dan menggantinya dengan tombol
     const detailHTML = `
         <div class="popup-content" style="position: relative; min-width: 220px; text-align: left;">
             <h3 style="margin-bottom: 5px; border-bottom: 2px solid #e74c3c; padding-bottom: 5px;">${loc.name}</h3>
-            <div class="popup-gallery" style="margin-top: 10px;">
-                <figure><img src="${loc.imgBangunan}" onerror="this.src='https://via.placeholder.com/150'"><figcaption>Tampak Depan</figcaption></figure>
-                <figure><img src="${loc.imgOrang}" onerror="this.src='https://via.placeholder.com/150'"><figcaption>Penanggung Jawab</figcaption></figure>
-            </div>
+            
+            <button onclick="window.bukaGaleriFoto(${index}, event)" class="btn-lihat-foto">
+                📸 Klik Lihat Foto
+            </button>
+            
             <p><strong>Kategori:</strong> ${loc.type}</p>
             <p><strong>Operasional:</strong> ${loc.jamOperasional}</p>
             <p><strong>Info:</strong> ${loc.desc}</p>
@@ -549,3 +551,50 @@ map.on('click', function(e) {
         }
     }
 });
+
+// Fungsi untuk membuka layar penuh galeri foto
+window.bukaGaleriFoto = function(index, event) {
+    if (event) {
+        event.stopPropagation();
+        event.preventDefault();
+    }
+    
+    const loc = locations[index];
+    
+    // Menyusun array foto. Jika nanti Anda menambahkan lebih dari 2 foto di data.js, 
+    // Anda bisa memasukkannya ke dalam array ini.
+    const kumpulanFoto = [loc.imgBangunan, loc.imgOrang, loc.imgRumah]; 
+
+    let modalHTML = `
+        <div id="galeri-overlay" class="galeri-overlay">
+            <div class="galeri-modal">
+                <button class="close-galeri" onclick="window.tutupGaleriFoto()">✖</button>
+                <h3 class="galeri-title">${loc.name}</h3>
+                <div class="galeri-slider">
+    `;
+    
+    // Masukkan setiap gambar ke dalam slider
+    kumpulanFoto.forEach((foto, i) => {
+        if (foto && foto !== "") {
+            modalHTML += `<img src="${foto}" alt="Foto ${i+1}" onerror="this.src='https://via.placeholder.com/400x250?text=Foto+Tidak+Tersedia'">`;
+        }
+    });
+    
+    modalHTML += `
+                </div>
+                <p class="galeri-hint">Geser kiri/kanan</p>
+            </div>
+        </div>
+    `;
+
+    // Sisipkan modal ke dalam halaman
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+};
+
+// Fungsi untuk menutup galeri
+window.tutupGaleriFoto = function() {
+    const overlay = document.getElementById('galeri-overlay');
+    if (overlay) {
+        overlay.remove();
+    }
+};

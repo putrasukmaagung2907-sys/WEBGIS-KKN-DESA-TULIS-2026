@@ -414,3 +414,122 @@ body, html {
     margin-top: 55px; 
     margin-right: 5px;
 }
+
+/* ==========================================
+   STYLING TOMBOL & GALERI FOTO (SLIDER)
+   ========================================== */
+
+/* Tombol Klik Foto */
+.btn-lihat-foto {
+    display: block;
+    width: 100%;
+    background-color: #f39c12;
+    color: white;
+    border: none;
+    padding: 8px;
+    border-radius: 4px;
+    margin: 10px 0;
+    font-weight: bold;
+    font-size: 13px;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    transition: all 0.3s ease;
+}
+.btn-lihat-foto:hover {
+    background-color: #d68910;
+    transform: translateY(-2px);
+}
+
+/* Latar Belakang Modal Melayang */
+.galeri-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(44, 62, 80, 0.9);
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(4px);
+    animation: fadeIn 0.3s ease;
+}
+
+/* Kotak Kontainer Utama Galeri */
+.galeri-modal {
+    background: #fff;
+    padding: 15px;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 500px;
+    position: relative;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+}
+
+.galeri-title {
+    margin: 0 0 15px 0;
+    color: #2c3e50;
+    font-size: 16px;
+    text-align: center;
+    border-bottom: 2px solid #3498db;
+    padding-bottom: 8px;
+}
+
+/* Tombol Tutup X */
+.close-galeri {
+    position: absolute;
+    top: -12px; right: -12px;
+    background: #e74c3c;
+    color: white;
+    border: 2px solid #fff;
+    border-radius: 50%;
+    width: 34px; height: 34px;
+    font-size: 16px;
+    cursor: pointer;
+    font-weight: bold;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+}
+.close-galeri:hover { background: #c0392b; }
+
+/* AREA GESER (EFEK RIAM/SNAP) */
+.galeri-slider {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory; /* Memaksa foto terkunci rapi saat digeser */
+    gap: 15px;
+    padding-bottom: 10px;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch; /* Kelancaran usap di HP Apple/Android */
+}
+
+/* Menyembunyikan/menipiskan scrollbar bawaan */
+.galeri-slider::-webkit-scrollbar { height: 6px; }
+.galeri-slider::-webkit-scrollbar-thumb { background: #bdc3c7; border-radius: 4px; }
+
+/* Desain setiap Foto */
+.galeri-slider img {
+    scroll-snap-align: center; /* Kunci tepat di tengah */
+    flex: 0 0 100%; /* Lebar penuh kontainer */
+    width: 100%;
+    height: 250px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+}
+
+.galeri-hint {
+    font-size: 12px;
+    color: #7f8c8d;
+    text-align: center;
+    margin: 10px 0 0 0;
+    font-weight: bold;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+}
+@keyframes pulse {
+    0% { opacity: 0.6; }
+    50% { opacity: 1; color: #3498db; }
+    100% { opacity: 0.6; }
+}

@@ -23,11 +23,11 @@ const batasDesaData = {
 
 const locations = [
     {
-        name: "Balai Desa Tulis", lat: -6.948722, lng: 109.793935, type: "Pusat Pemerintahan",
+        name: "RT 09", lat: -6.948722, lng: 109.793935, type: "Pusat Pemerintahan",
         desc: "Pusat administrasi dan pelayanan masyarakat Desa Tulis.",
         jamOperasional: "Senin - Jumat (08:00 - 15:00)",
-        whatsapp: "", // Kosongkan jika tidak ada
-        imgBangunan: "art galerry.png", imgOrang: "art galerry.png"
+        whatsapp: "085624166392", // Kosongkan jika tidak ada
+        imgBangunan: "A.jpg", imgRumah:"B.jpg", imgOrang: "C.jpg"
     },
     {
         name: "Klinik / Faskes Utama", lat: -6.922, lng: 109.838, type: "Fasilitas Kesehatan",
