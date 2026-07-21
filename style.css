@@ -652,3 +652,51 @@ body, html {
 .galeri-slider::-webkit-scrollbar { 
     display: none; /* Chrome, Safari, Opera */
 }
+
+/* ==========================================
+   STYLING WATERMARK KKN (POSISI ABSOLUT MUTLAK)
+   ========================================== */
+/* 1. Pengaturan di Layar Laptop/PC */
+.leaflet-control-attribution {
+    position: absolute !important;
+    bottom: 26px !important; /* Mengambang tepat di atas Status Bar */
+    right: 0 !important;
+    z-index: 9999 !important;
+    background-color: rgba(255, 255, 255, 0.85) !important;
+    padding: 3px 8px !important;
+    border-top-left-radius: 6px !important;
+    font-weight: 600 !important;
+    margin: 0 !important;
+}
+
+.leaflet-control-attribution a {
+    color: #3498db !important;
+    text-decoration: none;
+}
+
+/* Beri jarak Legenda di Desktop agar tidak tertabrak Watermark */
+.leaflet-bottom .leaflet-control.legend-container {
+    margin-bottom: 50px !important;
+}
+
+
+/* 2. Pengaturan Khusus di Layar HP (Mobile) */
+@media (max-width: 768px) {
+    .leaflet-control-attribution {
+        /* Menyelipkan teks di area kosong antara Status Bar dan Tombol Legenda */
+        bottom: 38px !important; 
+        font-size: 8px !important;
+        padding: 2px 6px !important;
+        
+        /* Mencegah teks memanjang hingga merusak/menabrak tombol kiri */
+        max-width: 65vw !important; 
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+    
+    /* Memastikan tombol Legenda di HP selalu berada di atas Watermark */
+    .leaflet-bottom .leaflet-control.legend-container {
+        margin-bottom: 65px !important; 
+    }
+}
