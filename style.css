@@ -653,20 +653,31 @@ body, html {
     display: none; /* Chrome, Safari, Opera */
 }
 
+
 /* ==========================================
-   STYLING WATERMARK KKN (POSISI ABSOLUT MUTLAK)
+   STYLING WATERMARK KKN
    ========================================== */
-/* 1. Pengaturan di Layar Laptop/PC */
+/* 1. Pengaturan Default di Layar Laptop/PC (Tampilan Website Normal) */
 .leaflet-control-attribution {
     position: absolute !important;
     bottom: 26px !important; /* Mengambang tepat di atas Status Bar */
-    right: 0 !important;
+    right: 0 !important;     /* Tetap di Kanan */
+    left: auto !important;
     z-index: 9999 !important;
     background-color: rgba(255, 255, 255, 0.85) !important;
     padding: 3px 8px !important;
     border-top-left-radius: 6px !important;
+    border-bottom-left-radius: 0 !important;
+    border-top-right-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
     font-weight: 600 !important;
     margin: 0 !important;
+    
+    /* Pastikan Teks Horizontal Normal di PC */
+    writing-mode: horizontal-tb !important;
+    transform: none !important;
+    text-align: left !important;
+    font-size: 11px !important;
 }
 
 .leaflet-control-attribution a {
@@ -674,29 +685,36 @@ body, html {
     text-decoration: none;
 }
 
-/* Beri jarak Legenda di Desktop agar tidak tertabrak Watermark */
+/* Beri jarak Legenda di Desktop agar tidak tertabrak Watermark Horizontal */
 .leaflet-bottom .leaflet-control.legend-container {
     margin-bottom: 50px !important;
 }
 
 
-/* 2. Pengaturan Khusus di Layar HP (Mobile) */
+/* 2. Pengaturan Khusus di Layar HP (Mobile) - Vertikal Kiri */
 @media (max-width: 768px) {
     .leaflet-control-attribution {
-        /* Menyelipkan teks di area kosong antara Status Bar dan Tombol Legenda */
-        bottom: 38px !important; 
-        font-size: 8px !important;
-        padding: 2px 6px !important;
+        left: 0 !important;      /* Pindah menempel ke tepi kiri layar */
+        right: auto !important;  /* Lepaskan dari tepi kanan */
+        bottom: 35px !important; /* Jarak aman dari status bar HP */
+        padding: 8px 3px !important;
+        border-top-right-radius: 8px !important;
+        border-bottom-right-radius: 8px !important;
+        border-top-left-radius: 0 !important; /* Sudut kiri siku-siku */
         
-        /* Mencegah teks memanjang hingga merusak/menabrak tombol kiri */
-        max-width: 65vw !important; 
+        /* Trik membuat teks menurun vertikal (dibaca dari bawah ke atas) */
+        writing-mode: vertical-rl !important;
+        transform: rotate(180deg) !important;
+        text-align: center !important;
+        letter-spacing: 0.5px !important;
+        
+        font-size: 8.5px !important;
+        max-width: none !important; 
         white-space: nowrap !important;
-        overflow: hidden !important;
-        text-overflow: ellipsis !important;
     }
     
-    /* Memastikan tombol Legenda di HP selalu berada di atas Watermark */
+    /* Kembalikan Tombol Legenda di HP ke posisi bawah normal (karena teks KKN sudah pindah kiri) */
     .leaflet-bottom .leaflet-control.legend-container {
-        margin-bottom: 65px !important; 
+        margin-bottom: 35px !important; 
     }
 }
