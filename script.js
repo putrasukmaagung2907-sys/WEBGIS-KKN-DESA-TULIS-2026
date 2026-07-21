@@ -639,3 +639,5 @@ window.tutupGaleriFoto = function() {
     }
 };
 
+
+

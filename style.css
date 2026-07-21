@@ -265,6 +265,25 @@ body, html {
 }
 
 /* ==========================================
+   STYLING WATERMARK / ATRIBUSI TIM KKN
+   ========================================== */
+.leaflet-control-attribution {
+    background-color: rgba(255, 255, 255, 0.9) !important;
+    color: #2c3e50 !important;
+    font-weight: 700;
+    padding: 4px 10px !important;
+    border-top-left-radius: 8px;
+    box-shadow: -2px -2px 5px rgba(0,0,0,0.2);
+    /* Angkat ke atas status bar di layar laptop/PC */
+    margin-bottom: 28px !important; 
+}
+
+.leaflet-control-attribution a {
+    color: #3498db !important;
+    text-decoration: none;
+}
+
+/* ==========================================
    Styling Legenda Dinamis
    ========================================== */
 .leaflet-bottom .leaflet-control.legend-container {
@@ -362,6 +381,19 @@ body, html {
     /* 6. Status bar diringkas teksnya */
     #earth-status-bar { font-size: 9px; gap: 8px; justify-content: center; flex-wrap: wrap; padding: 3px 5px; }
 }
+
+    /* 7. Penyesuaian Watermark Tim KKN di HP */
+    .leaflet-control-attribution {
+        margin-bottom: 22px !important; /* Angkat pas di atas status bar HP */
+        font-size: 8.5px !important;    /* Perkecil huruf agar terlihat rapi */
+        padding: 2px 6px !important;
+        
+        /* Trik agar teks tidak memanjang merusak layar */
+        max-width: 65vw; 
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis; /* Tambahkan titik-titik (...) jika teks terlalu panjang */
+    }
 
 /* ==========================================
    FITUR LAPOR WARGA (CROWDSOURCING)
