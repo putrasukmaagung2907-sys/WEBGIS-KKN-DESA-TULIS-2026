@@ -264,24 +264,6 @@ body, html {
     pointer-events: none; 
 }
 
-/* ==========================================
-   STYLING WATERMARK / ATRIBUSI TIM KKN
-   ========================================== */
-.leaflet-control-attribution {
-    background-color: rgba(255, 255, 255, 0.9) !important;
-    color: #2c3e50 !important;
-    font-weight: 700;
-    padding: 4px 10px !important;
-    border-top-left-radius: 8px;
-    box-shadow: -2px -2px 5px rgba(0,0,0,0.2);
-    /* Angkat ke atas status bar di layar laptop/PC */
-    margin-bottom: 28px !important; 
-}
-
-.leaflet-control-attribution a {
-    color: #3498db !important;
-    text-decoration: none;
-}
 
 /* ==========================================
    Styling Legenda Dinamis
@@ -342,6 +324,26 @@ body, html {
     font-weight: bold;
     cursor: pointer;
     margin-left: 15px;
+}
+
+
+/* ==========================================
+   STYLING WATERMARK / ATRIBUSI TIM KKN
+   ========================================== */
+.leaflet-control-attribution {
+    background-color: rgba(255, 255, 255, 0.9) !important;
+    color: #2c3e50 !important;
+    font-weight: 700;
+    padding: 4px 10px !important;
+    border-top-left-radius: 8px;
+    box-shadow: -2px -2px 5px rgba(0,0,0,0.2);
+    /* Angkat ke atas status bar di layar laptop/PC */
+    margin-bottom: 28px !important; 
+}
+
+.leaflet-control-attribution a {
+    color: #3498db !important;
+    text-decoration: none;
 }
 
 /* ==========================================
