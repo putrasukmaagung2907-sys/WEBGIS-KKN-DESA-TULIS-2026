@@ -75,6 +75,9 @@ body, html {
     font-weight: bold; 
     margin-top: 5px; 
     box-shadow: 0 2px 4px rgba(0,0,0,0.2); 
+    border: none; /* Tambahan untuk mengatasi default garis tepi button */
+    cursor: pointer; /* Tambahan agar kursor menjadi telunjuk */
+    font-family: inherit;
 }
 .wa-btn:hover { 
     background-color: #128C7E; 
@@ -420,24 +423,28 @@ body, html {
    ========================================== */
 
 /* Tombol Klik Foto */
+/* Update Tombol Klik Foto (Menjadi Ikon Kamera Bulat) */
 .btn-lihat-foto {
-    display: block;
-    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     background-color: #f39c12;
     color: white;
     border: none;
-    padding: 8px;
-    border-radius: 4px;
-    margin: 10px 0;
-    font-weight: bold;
-    font-size: 13px;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%; /* Membuat tombol menjadi bulat sempurna */
     cursor: pointer;
     box-shadow: 0 2px 4px rgba(0,0,0,0.2);
     transition: all 0.3s ease;
+    flex-shrink: 0; /* Mencegah tombol gepeng jika judul panjang */
+    margin-left: 8px; /* Memberi jarak dengan teks judul */
 }
+
+/* Efek saat kursor berada di atas tombol kamera */
 .btn-lihat-foto:hover {
     background-color: #d68910;
-    transform: translateY(-2px);
+    transform: scale(1.15); /* Tombol membesar sedikit untuk efek interaktif */
 }
 
 /* Latar Belakang Modal Melayang */
@@ -490,29 +497,57 @@ body, html {
 .close-galeri:hover { background: #c0392b; }
 
 /* AREA GESER (EFEK RIAM/SNAP) */
-.galeri-slider {
+/* ==========================================
+   WADAH FOTO & ANIMASI LOADING
+   ========================================== */
+
+/* Kontainer membungkus masing-masing foto */
+.foto-container {
+    position: relative;
+    flex: 0 0 100%; /* Lebar penuh kontainer slider */
+    scroll-snap-align: center;
+    height: 250px;
+    background-color: #ecf0f1; /* Latar abu-abu terang saat loading */
+    border-radius: 8px;
     display: flex;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory; /* Memaksa foto terkunci rapi saat digeser */
-    gap: 15px;
-    padding-bottom: 10px;
-    scroll-behavior: smooth;
-    -webkit-overflow-scrolling: touch; /* Kelancaran usap di HP Apple/Android */
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    border: 1px solid #ddd;
 }
 
-/* Menyembunyikan/menipiskan scrollbar bawaan */
-.galeri-slider::-webkit-scrollbar { height: 6px; }
-.galeri-slider::-webkit-scrollbar-thumb { background: #bdc3c7; border-radius: 4px; }
+/* Animasi Spinner Berputar */
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #bdc3c7; /* Warna track */
+    border-top: 4px solid #3498db; /* Warna baris putaran (biru) */
+    border-radius: 50%;
+    animation: spin-loader 1s linear infinite;
+    position: absolute;
+    z-index: 1; /* Posisikan di bawah gambar */
+}
 
-/* Desain setiap Foto */
-.galeri-slider img {
-    scroll-snap-align: center; /* Kunci tepat di tengah */
-    flex: 0 0 100%; /* Lebar penuh kontainer */
+@keyframes spin-loader {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Desain Gambar */
+.foto-container img {
     width: 100%;
-    height: 250px;
+    height: 100%;
     object-fit: cover;
-    border-radius: 8px;
-    border: 1px solid #ddd;
+    position: absolute;
+    top: 0; left: 0;
+    z-index: 2; /* Menutupi spinner ketika muncul */
+    opacity: 0; /* Mulai dengan menghilang / tidak terlihat */
+    transition: opacity 0.6s ease-in-out; /* Transisi memudar yang mulus */
+}
+
+/* Gambar muncul setelah memuat sepenuhnya (dipicu oleh JavaScript) */
+.foto-container img.loaded {
+    opacity: 1;
 }
 
 .galeri-hint {
@@ -532,4 +567,54 @@ body, html {
     0% { opacity: 0.6; }
     50% { opacity: 1; color: #3498db; }
     100% { opacity: 0.6; }
+}
+
+/* ==========================================
+   TOMBOL PANAH GALERI
+   ========================================== */
+.nav-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.5); /* Setengah transparan */
+    color: white;
+    border: none;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 10;
+    font-size: 16px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: background 0.3s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.nav-btn:hover {
+    background: rgba(0, 0, 0, 0.9); /* Gelap saat di-hover */
+}
+
+/* Jarak panah dari tepi gambar */
+.prev-btn { left: 5px; }
+.next-btn { right: 5px; }
+
+/* ==========================================
+   WADAH UTAMA SLIDER (AGAR FOTO MENYAMPING)
+   ========================================== */
+.galeri-slider {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    width: 100%;
+    
+    /* Sembunyikan scrollbar agar terlihat seperti aplikasi native */
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+}
+
+.galeri-slider::-webkit-scrollbar { 
+    display: none; /* Chrome, Safari, Opera */
 }

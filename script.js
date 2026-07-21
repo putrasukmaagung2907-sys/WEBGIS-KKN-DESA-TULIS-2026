@@ -187,16 +187,35 @@ window.tampilkanDetailBaru = function(index, event) {
 
     const loc = locations[index];
     const marker = searchData[index].marker;
-    let waButtonHTML = loc.whatsapp ? `<a href="https://wa.me/${loc.whatsapp}" target="_blank" class="wa-btn">💬 Chat Pemilik/Admin</a>` : '';
     
-    // PERUBAHAN: Menghapus tag <figure> gambar dan menggantinya dengan tombol
+    // ==========================================
+    // PERBAIKAN: Logika Tombol WhatsApp
+    // ==========================================
+    let waButtonHTML = '';
+    if (loc.whatsapp) {
+        let nomorWA = loc.whatsapp;
+        
+        // Otomatis ubah angka "0" di depan menjadi "62" agar valid di API WhatsApp
+        if (nomorWA.startsWith('0')) {
+            nomorWA = '62' + nomorWA.substring(1);
+        }
+        
+        // Menggunakan <button> dan window.open untuk mencegah "mental" di layar HP
+        waButtonHTML = `<button type="button" class="wa-btn" onclick="window.open('https://wa.me/${nomorWA}', '_blank', 'noopener,noreferrer'); event.stopPropagation();">💬 Chat Pemilik/Admin</button>`;
+    }
+    
+    // PERUBAHAN: Tombol ikon kamera kini sejajar dengan judul di kanan atas
     const detailHTML = `
         <div class="popup-content" style="position: relative; min-width: 220px; text-align: left;">
-            <h3 style="margin-bottom: 5px; border-bottom: 2px solid #e74c3c; padding-bottom: 5px;">${loc.name}</h3>
-            
-            <button onclick="window.bukaGaleriFoto(${index}, event)" class="btn-lihat-foto">
-                📸 Klik Lihat Foto
-            </button>
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e74c3c; padding-bottom: 5px; margin-bottom: 10px;">
+                <h3 style="margin: 0; border: none; padding: 0;">${loc.name}</h3>
+                <button onclick="window.bukaGaleriFoto(${index}, event)" class="btn-lihat-foto" title="Lihat Foto Lokasi">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                        <circle cx="12" cy="13" r="4"></circle>
+                    </svg>
+                </button>
+            </div>
             
             <p><strong>Kategori:</strong> ${loc.type}</p>
             <p><strong>Operasional:</strong> ${loc.jamOperasional}</p>
@@ -560,9 +579,6 @@ window.bukaGaleriFoto = function(index, event) {
     }
     
     const loc = locations[index];
-    
-    // Menyusun array foto. Jika nanti Anda menambahkan lebih dari 2 foto di data.js, 
-    // Anda bisa memasukkannya ke dalam array ini.
     const kumpulanFoto = [loc.imgBangunan, loc.imgOrang, loc.imgRumah]; 
 
     let modalHTML = `
@@ -570,31 +586,56 @@ window.bukaGaleriFoto = function(index, event) {
             <div class="galeri-modal">
                 <button class="close-galeri" onclick="window.tutupGaleriFoto()">✖</button>
                 <h3 class="galeri-title">${loc.name}</h3>
-                <div class="galeri-slider">
+                
+                <!-- BUNGKUSAN BARU UNTUK PANAH KIRI-KANAN -->
+                <div class="slider-wrapper" style="position: relative;">
+                    <button class="nav-btn prev-btn" onclick="window.geserGaleri(-1)">&#10094;</button>
+                    
+                    <div class="galeri-slider" id="galeri-slider">
     `;
     
-    // Masukkan setiap gambar ke dalam slider
     kumpulanFoto.forEach((foto, i) => {
         if (foto && foto !== "") {
-            modalHTML += `<img src="${foto}" alt="Foto ${i+1}" onerror="this.src='https://via.placeholder.com/400x250?text=Foto+Tidak+Tersedia'">`;
+            modalHTML += `
+                <div class="foto-container">
+                    <div class="loading-spinner"></div>
+                    <img src="${foto}" alt="Foto ${i+1}" 
+                         onload="this.classList.add('loaded')" 
+                         onerror="this.src='https://via.placeholder.com/400x250?text=Foto+Tidak+Tersedia'; this.classList.add('loaded');">
+                </div>
+            `;
         }
     });
     
     modalHTML += `
+                    </div>
+                    
+                    <button class="nav-btn next-btn" onclick="window.geserGaleri(1)">&#10095;</button>
                 </div>
-                <p class="galeri-hint">Geser kiri/kanan</p>
+                <!-- AKHIR BUNGKUSAN -->
+
+                <p class="galeri-hint">👆 Geser atau gunakan panah untuk melihat foto</p>
             </div>
         </div>
     `;
 
-    // Sisipkan modal ke dalam halaman
     document.body.insertAdjacentHTML('beforeend', modalHTML);
 };
 
-// Fungsi untuk menutup galeri
+// FUNGSI BARU: Untuk menggeser galeri saat tombol panah diklik
+window.geserGaleri = function(arah) {
+    const slider = document.getElementById('galeri-slider');
+    if(slider) {
+        // Mendapatkan lebar satu gambar untuk menentukan jarak geser
+        const jarakGeser = slider.clientWidth; 
+        slider.scrollBy({ left: arah * jarakGeser, behavior: 'smooth' });
+    }
+};
+
 window.tutupGaleriFoto = function() {
     const overlay = document.getElementById('galeri-overlay');
     if (overlay) {
         overlay.remove();
     }
 };
+
