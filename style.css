@@ -694,35 +694,34 @@ body, html {
 /* 2. Pengaturan Khusus di Layar HP (Mobile) - Vertikal Kiri */
 @media (max-width: 768px) {
     .leaflet-control-attribution {
-        /* KUNCI UTAMA: Pakai fixed agar lepas dari cengkraman posisi Kanan Leaflet */
         position: fixed !important; 
-        left: 0 !important;      /* Menempel ke tepi paling kiri layar */
-        right: auto !important;  /* Paksa lepas dari kanan */
-        bottom: 40px !important; /* Jarak aman dari status bar hitam di bawah */
+        left: 0 !important;      
+        right: auto !important;  
+        bottom: 50px !important; /* Dinaikkan sedikit agar sejajar rapi */
         
-        /* Trik teks menurun vertikal (dibaca dari bawah ke atas) */
         writing-mode: vertical-rl !important;
         transform: rotate(180deg) !important;
         text-align: center !important;
         letter-spacing: 0.5px !important;
         
-        /* Bentuk kotak (hanya sudut kanan yang melengkung) */
-        padding: 10px 4px !important;
-        border-top-right-radius: 8px !important;
-        border-bottom-right-radius: 8px !important;
-        border-top-left-radius: 0 !important; 
-        border-bottom-left-radius: 0 !important;
+        padding: 10px 5px !important;
         
-        /* Ukuran huruf dan batasan panjang */
+        /* PERBAIKAN SUDUT: Logika dibalik karena elemen diputar 180 derajat */
+        /* Sekarang sudut lengkung akan berada di kanan, dan sudut rata menempel di kiri layar */
+        border-top-left-radius: 8px !important;
+        border-bottom-left-radius: 8px !important;
+        border-top-right-radius: 0 !important; 
+        border-bottom-right-radius: 0 !important;
+        
         font-size: 8.5px !important;
-        max-height: 55vh !important; /* Maksimal panjangnya 55% dari tinggi layar HP */
+        max-height: 55vh !important; 
         white-space: nowrap !important;
         overflow: hidden !important;
-        text-overflow: ellipsis !important; /* Tambah (...) jika teks kepanjangan */
+        text-overflow: ellipsis !important;
     }
     
-    /* Kembalikan Tombol Legenda di HP ke posisi bawah normal */
-    .leaflet-bottom .leaflet-control.legend-container {
-        margin-bottom: 35px !important; 
+    /* PERBAIKAN LEGENDA: Mengangkat seluruh wadah tombol di kanan bawah */
+    .leaflet-bottom.leaflet-right {
+        bottom: 50px !important; /* Paksa wadah legenda naik menjauhi bar koordinat */
     }
 }
