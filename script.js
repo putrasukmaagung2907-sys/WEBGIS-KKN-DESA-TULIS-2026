@@ -402,36 +402,25 @@ const compassControl = L.control({ position: 'topleft' });
 compassControl.onAdd = function (map) {
     const div = L.DomUtil.create('div', 'compass-control');
     
-    // Wadah kompas dengan efek Bulat, Glassmorphism (blur), dan transisi animasi Hover
+    // margin-top: 10px dan margin-left: 2px agar pas di bawah tombol Geoman
     div.innerHTML = `
-    <div style="background: rgba(30, 40, 50, 0.85); backdrop-filter: blur(4px); padding: 6px; border-radius: 50%; border: 2px solid #3498db; margin-top: 55px; margin-left: 5px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; cursor: default; transition: transform 0.3s ease;" 
+    <div style="background: rgba(30, 40, 50, 0.85); backdrop-filter: blur(4px); padding: 6px; border-radius: 50%; border: 2px solid #3498db; margin-top: 10px; margin-left: 2px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; cursor: default; transition: transform 0.3s ease;" 
          onmouseover="this.style.transform='scale(1.15)'" 
          onmouseout="this.style.transform='scale(1)'"
          title="Arah Utara">
         
-        <!-- Kanvas SVG Kompas -->
         <svg width="30" height="30" viewBox="0 0 100 100" style="filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.6));">
-            <!-- Cincin Putus-putus Luar -->
             <circle cx="50" cy="50" r="44" fill="none" stroke="#7f8c8d" stroke-width="2" stroke-dasharray="3 4" />
-            <!-- Cincin Biru Dalam -->
             <circle cx="50" cy="50" r="36" fill="none" stroke="#3498db" stroke-width="1" opacity="0.6"/>
-            
-            <!-- Jarum Selatan, Timur, Barat (Warna Abu-abu/Silver) -->
             <polygon points="50,88 43,50 50,55" fill="#ecf0f1" />
             <polygon points="50,88 57,50 50,55" fill="#95a5a6" />
             <polygon points="88,50 50,43 55,50" fill="#ecf0f1" />
             <polygon points="88,50 50,57 55,50" fill="#95a5a6" />
             <polygon points="12,50 50,43 45,50" fill="#95a5a6" />
             <polygon points="12,50 50,57 45,50" fill="#ecf0f1" />
-            
-            <!-- Jarum Utara Utama (Merah Terang) -->
             <polygon points="50,8 38,50 50,44" fill="#e74c3c" />
             <polygon points="50,8 62,50 50,44" fill="#c0392b" />
-            
-            <!-- Titik Poros Emas di Tengah -->
             <circle cx="50" cy="50" r="4.5" fill="#f1c40f" />
-            
-            <!-- Label Huruf U (Utara) -->
             <text x="50" y="32" font-family="'Segoe UI', Tahoma, sans-serif" font-size="18" font-weight="900" fill="#ffffff" text-anchor="middle">U</text>
         </svg>
     </div>`;

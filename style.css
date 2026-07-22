@@ -409,15 +409,29 @@ body, html {
 
     /* 7. Penyesuaian Watermark Tim KKN di HP */
     .leaflet-control-attribution {
-        margin-bottom: 22px !important; /* Angkat pas di atas status bar HP */
-        font-size: 8.5px !important;    /* Perkecil huruf agar terlihat rapi */
-        padding: 2px 6px !important;
+        position: absolute !important; 
+        left: auto !important;      
+        right: 0 !important;        /* Posisikan nempel ke kanan */
+        bottom: 22px !important;    /* Angkat ke atas garis merah status bar */
         
-        /* Trik agar teks tidak memanjang merusak layar */
-        max-width: 65vw; 
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis; /* Tambahkan titik-titik (...) jika teks terlalu panjang */
+        writing-mode: horizontal-tb !important; /* Kembalikan arah teks ke horizontal */
+        transform: none !important;             
+        text-align: right !important;
+        letter-spacing: normal !important;
+        
+        padding: 3px 6px !important;
+        
+        /* Lengkungkan sudut atas kiri saja agar menyatu dengan layar kanan */
+        border-top-left-radius: 6px !important;
+        border-bottom-left-radius: 0 !important;
+        border-top-right-radius: 0 !important; 
+        border-bottom-right-radius: 0 !important;
+        
+        font-size: 8.5px !important;
+        max-width: 70vw !important;  
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
     }
 
 /* ==========================================
@@ -553,7 +567,6 @@ body, html {
 }
 .close-galeri:hover { background: #c0392b; }
 
-/* AREA GESER (EFEK RIAM/SNAP) */
 /* ==========================================
    WADAH FOTO & ANIMASI LOADING
    ========================================== */
@@ -563,8 +576,12 @@ body, html {
     position: relative;
     flex: 0 0 100%; 
     scroll-snap-align: center;
-    height: 300px;
-    background-color: #ffffff; /* 👈 Ubah jadi warna gelap agar bingkai foto menyatu */
+    
+    /* MENGATUR RASIO KHUSUS 9:16 (Format Story/Layar HP Vertikal) */
+    aspect-ratio: 16 / 9; 
+    max-height: 70vh; /* Sedikit dinaikkan agar pas dengan proporsi 9:16 di layar HP */
+    
+    background-color: #f8f9fa; 
     border-radius: 8px;
     display: flex;
     justify-content: center;
@@ -573,16 +590,16 @@ body, html {
     border: 1px solid #ddd;
 }
 
-/* Animasi Spinner Berputar */
+/* (Animasi Spinner biarkan tetap sama) */
 .loading-spinner {
     width: 40px;
     height: 40px;
-    border: 4px solid #bdc3c7; /* Warna track */
-    border-top: 4px solid #3498db; /* Warna baris putaran (biru) */
+    border: 4px solid #bdc3c7; 
+    border-top: 4px solid #3498db; 
     border-radius: 50%;
     animation: spin-loader 1s linear infinite;
     position: absolute;
-    z-index: 1; /* Posisikan di bawah gambar */
+    z-index: 1; 
 }
 
 @keyframes spin-loader {
@@ -594,7 +611,10 @@ body, html {
 .foto-container img {
     width: 100%;
     height: 100%;
-    object-fit: contain; /* 👈 KUNCI UTAMA: Ubah dari cover menjadi contain */
+    
+    /* KUNCI: Gunakan 'cover' agar foto otomatis mengisi penuh bingkai 3:4 */
+    object-fit: cover; 
+    
     position: absolute;
     top: 0; left: 0;
     z-index: 2; 
@@ -602,7 +622,7 @@ body, html {
     transition: opacity 0.6s ease-in-out; 
 }
 
-/* Gambar muncul setelah memuat sepenuhnya (dipicu oleh JavaScript) */
+/* Gambar muncul setelah memuat sepenuhnya */
 .foto-container img.loaded {
     opacity: 1;
 }
