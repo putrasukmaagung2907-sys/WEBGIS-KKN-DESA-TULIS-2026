@@ -366,8 +366,36 @@ updateEyeAltitude();
 // ==========================================
 // 6. LEGENDA, KOMPAS, & FUNGSI TOGGLE
 // ==========================================
+window.toggleLegenda = function() {
+    const legendContainer = document.querySelector('.legend-container');
+    if (legendContainer) {
+        legendContainer.classList.toggle('show');
+    }
+};
 
-// (Biarkan kode legend / legenda yang ada di atas ini tetap sama) ...
+const legend = L.control({ position: 'bottomright' });
+legend.onAdd = function (map) {
+    const div = L.DomUtil.create('div', 'info legend-container');
+    const categories = ["Pusat Pemerintahan", "Fasilitas Ibadah", "Fasilitas Kesehatan", "Fasilitas Pendidikan", "UMKM", "Keamanan Lingkungan"];
+    
+    let content = '<div class="legend-content">';
+    content += '<h4>Legenda <button type="button" class="close-legend-btn" onclick="window.toggleLegenda()">✖</button></h4>';
+    categories.forEach(cat => { content += `<i style="background:${getMarkerColor(cat)}"></i> ${cat}<br>`; });
+    content += '<i style="background:#3498db"></i> Lokasi Anda<br>';
+    content += '<hr style="border: 0; border-top: 1px solid #7f8c8d; margin: 8px 0;">';
+    content += '<i style="background:#2c12f3; height: 4px; margin-top: 7px; border-radius: 0;"></i> Jalan Pantura<br>';
+    content += '<i style="background:#c9a01a; height: 2px; margin-top: 8px; border-radius: 0;"></i> Jalan Desa<br>';
+    content += '<i style="background: transparent; border-top: 3px dashed #b1aeae; height: 0; margin-top: 8px; border-radius: 0;"></i> Batas Administrasi<br>';
+    content += '</div>';
+
+    let btn = '<button type="button" id="legend-toggle-btn" onclick="window.toggleLegenda()">📜 Legenda</button>';
+
+    div.innerHTML = btn + content;
+    L.DomEvent.disableClickPropagation(div);
+
+    return div;
+};
+legend.addTo(map);
 
 // KOMPAS BARU YANG LEBIH MODERN DAN MENARIK
 const compassControl = L.control({ position: 'topleft' });
