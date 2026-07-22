@@ -1,12 +1,26 @@
 // ==========================================
 // 1. INISIALISASI PETA & BASEMAPS (Layer Control)
 // ==========================================
-const map = L.map('map', { doubleClickZoom: false }).setView([-6.945, 109.785], 15); 
+const map = L.map('map', { 
+    preferCanvas: true, 
+    doubleClickZoom: false 
+}).setView([-6.945, 109.785], 15); 
 map.attributionControl.setPrefix('Dibuat oleh Tim KKN Undip Desa Tulis 2026 | <a href="https://leafletjs.com">Leaflet</a>');
 
 // Pilihan Basemap
-const googleSat = L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', { maxZoom: 20, attribution: 'Google Satellite' }).addTo(map);
-const osmStreet = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: 'OpenStreetMap' });
+const googleSat = L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', { 
+    maxZoom: 20, 
+    attribution: 'Google Satellite',
+    keepBuffer: 4,
+    updateWhenZooming: false
+}).addTo(map);
+
+const osmStreet = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { 
+    maxZoom: 19, 
+    attribution: 'OpenStreetMap',
+    keepBuffer: 4,
+    updateWhenZooming: false
+});
 
 L.control.layers({
     "Citra Satelit": googleSat,
@@ -109,6 +123,7 @@ function konversiKoordinat(coords) {
 // Garis Tepi Desa Putus-putus
 L.geoJSON(batasDesaData, {
     pane: 'paneBatasDesa',
+    smoothFactor: 2.0,
     style: function(feature) { return { color: "#f9f9f9", weight: 3, fillOpacity: 0, dashArray: "5, 5" }; }
 }).addTo(map);
 
@@ -127,8 +142,19 @@ const layerGroups = {
     "Jalan Pantura": L.layerGroup().addTo(map)
 };
 
-L.geoJSON(jalanDesaData, { pane: 'paneJalanDesa', coordsToLatLng: konversiKoordinat, style: { color: "#c9a01a", weight: 3, opacity: 0.8 } }).addTo(layerGroups["Jalan Desa"]);
-L.geoJSON(jalanPanturaData, { pane: 'paneJalanPantura', coordsToLatLng: konversiKoordinat, style: { color: "#2c12f3", weight: 6, opacity: 0.9 } }).bindTooltip("Jl. PANTURA", { sticky: true, className: 'label-tempat' }).addTo(layerGroups["Jalan Pantura"]);
+L.geoJSON(jalanDesaData, { 
+    pane: 'paneJalanDesa', 
+    coordsToLatLng: konversiKoordinat, 
+    smoothFactor: 1.5,
+    style: { color: "#c9a01a", weight: 3, opacity: 0.8 } 
+}).addTo(layerGroups["Jalan Desa"]);
+
+L.geoJSON(jalanPanturaData, { 
+    pane: 'paneJalanPantura', 
+    coordsToLatLng: konversiKoordinat, 
+    smoothFactor: 1.5,
+    style: { color: "#2c12f3", weight: 6, opacity: 0.9 } 
+}).bindTooltip("Jl. PANTURA", { sticky: true, className: 'label-tempat' }).addTo(layerGroups["Jalan Pantura"]);
 
 function getMarkerColor(kategori) {
     switch(kategori) {
@@ -674,6 +700,3 @@ window.tutupGaleriFoto = function() {
         overlay.remove();
     }
 };
-
-
-

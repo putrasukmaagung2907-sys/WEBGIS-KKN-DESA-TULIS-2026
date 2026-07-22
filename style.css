@@ -734,37 +734,31 @@ body, html {
 }
 
 
-/* 2. Pengaturan Khusus di Layar HP (Mobile) - Vertikal Kiri */
+/* 2. Pengaturan Khusus di Layar HP (Mobile) */
 @media (max-width: 768px) {
     .leaflet-control-attribution {
         position: fixed !important; 
-        left: 0 !important;      
-        right: auto !important;  
-        bottom: 50px !important; /* Dinaikkan sedikit agar sejajar rapi */
+        left: auto !important;       /* Lepaskan dari kiri */
+        right: 10px !important;      /* Tempelkan ke kanan dengan jarak 10px */
+        bottom: 25px !important;     /* Simpan di bawah legenda, di atas bar hitam koordinat */
         
-        writing-mode: vertical-rl !important;
-        transform: rotate(180deg) !important;
-        text-align: center !important;
-        letter-spacing: 0.5px !important;
+        /* Ubah menjadi horizontal */
+        writing-mode: horizontal-tb !important; 
+        transform: none !important;
+        text-align: right !important;
         
-        padding: 10px 5px !important;
+        padding: 5px 10px !important;
         
-        /* PERBAIKAN SUDUT: Logika dibalik karena elemen diputar 180 derajat */
-        /* Sekarang sudut lengkung akan berada di kanan, dan sudut rata menempel di kiri layar */
-        border-top-left-radius: 8px !important;
-        border-bottom-left-radius: 8px !important;
-        border-top-right-radius: 0 !important; 
-        border-bottom-right-radius: 0 !important;
+        /* Sudut background dibulatkan merata */
+        border-radius: 8px !important; 
         
         font-size: 8.5px !important;
-        max-height: 55vh !important; 
         white-space: nowrap !important;
-        overflow: hidden !important;
-        text-overflow: ellipsis !important;
+        max-width: 70vw !important; /* Agar teks tidak melebar melewati batas layar */
     }
     
     /* PERBAIKAN LEGENDA: Mengangkat seluruh wadah tombol di kanan bawah */
     .leaflet-bottom.leaflet-right {
-        bottom: 50px !important; /* Paksa wadah legenda naik menjauhi bar koordinat */
+        bottom: 50px !important; /* Memberikan ruang di bawah legenda untuk teks watermark KKN */
     }
 }
