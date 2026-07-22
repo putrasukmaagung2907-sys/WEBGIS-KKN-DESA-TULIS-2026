@@ -23,46 +23,46 @@ const batasDesaData = {
 
 const locations = [
     {
-        name: "RT 09", lat: -6.948722, lng: 109.793935, type: "Pusat Pemerintahan",
+        name: "Balai Desa", lat: -6.947617, lng: 109.784071, type: "Pusat Pemerintahan",
         desc: "Pusat administrasi dan pelayanan masyarakat Desa Tulis.",
         jamOperasional: "Senin - Jumat (08:00 - 15:00)",
-        whatsapp: "085624166392", // Kosongkan jika tidak ada
-        imgBangunan: "A.jpg", imgRumah:"B.jpg", imgOrang: "C.jpg"
+        whatsapp: "6285624166392", // Kosongkan jika tidak ada
+        imgSatu: "A.jpg", imgDua:"B.jpg", imgTiga: "C.jpg"
     },
     {
-        name: "Klinik / Faskes Utama", lat: -6.922, lng: 109.838, type: "Fasilitas Kesehatan",
+        name: "Posyandu", lat: -6.949139, lng: 109.787277, type: "Fasilitas Kesehatan",
         desc: "Pelayanan kesehatan tingkat pertama bagi warga.",
-        jamOperasional: "24 Jam",
-        whatsapp: "6281234567890", // Format kode negara (62) tanpa plus
-        imgBangunan: "art galerry.png", imgOrang: "art galerry.png"
+        jamOperasional: "5 Jam",
+        whatsapp: "6287810107158", // Format kode negara (62) tanpa plus
+        imgSatu: "PSYA.jpg", imgDua: "PSYB.jpg", imgTiga: "PSYC.jpg"
     },
     {
         name: "SDN Tulis 01", lat: -6.949718, lng: 109.788332, type: "Fasilitas Pendidikan",
         desc: "Sekolah Dasar Negeri utama di Desa Tulis.",
         jamOperasional: "Senin - Sabtu (07:00 - 14:00)",
         whatsapp: "",
-        imgBangunan: "art galerry.png", imgOrang: "art galerry.png"
+        imgSatu: "SDN1A.jpg", imgDua: "SDN1B.jpg", imgTiga: "SDN1C.jpg"
     },
     {
-        name: "Pusat Oleh-Oleh Khas", lat: -6.949, lng: 109.786, type: "UMKM",
+        name: "Seblak", lat: -6.949, lng: 109.786, type: "UMKM",
         desc: "Pusat produksi dan penjualan makanan ringan khas Tulis.",
         jamOperasional: "Setiap Hari (09:00 - 21:00)",
         whatsapp: "6289876543210",
-        imgBangunan: "assets/umkm_depan.jpg", imgOrang: "assets/owner.jpg"
+        imgSatu: "random.jpg", imgDua: "random.jpg", imgTiga: "random.jpg"
     },
     {
-        name: "Pos RT 01", lat: -6.927, lng: 109.832, type: "Keamanan Lingkungan",
+        name: "Poskamling", lat: -6.949591, lng: 109.786011, type: "Keamanan Lingkungan",
         desc: "Poskamling utama untuk blok utara.",
         jamOperasional: "Pos Siaga 24 Jam",
         whatsapp: "",
-        imgBangunan: "assets/pos_depan.jpg", imgOrang: "assets/ketua_rt.jpg"
+        imgSatu: "random.jpg", imgDua: "random.jpg", imgTiga: "random.jpg"
     },
     {
-        name: "Masjid Baiturrahman", lat: -6.956, lng: 109.840, type: "Fasilitas Ibadah",
+        name: "Masjid Tulis", lat: -6.949011, lng: 109.787278, type: "Fasilitas Ibadah",
         desc: "Pusat kegiatan ibadah warga sekitar.",
         jamOperasional: "24 Jam",
         whatsapp: "",
-        imgBangunan: "assets/pos_depan.jpg", imgOrang: "assets/ketua_rt.jpg"
+        imgSatu: "random.jpg", imgDua: "random.jpg", imgTiga: "random.jpg"
     }
 ];
 

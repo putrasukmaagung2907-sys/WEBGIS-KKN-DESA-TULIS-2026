@@ -155,11 +155,14 @@ function getPopupAwalHTML(index) {
 locations.forEach((loc, index) => {
     const markerColor = getMarkerColor(loc.type);
     
+    // TAMBAHAN: Buat class CSS otomatis dari kategori (misal: "UMKM" jadi "label-umkm")
+    const classKategori = 'label-' + loc.type.toLowerCase().replace(/\s+/g, '-');
+    
     // Label permanen dengan offset untuk mencegah tumpang tindih dengan titik merah
     const marker = L.circleMarker([loc.lat, loc.lng], {
         radius: 6, fillColor: markerColor, color: "#ffffff", weight: 1.5, fillOpacity: 1
     })
-    .bindTooltip(loc.name, { permanent: true, direction: 'top', offset: [0, -5], className: 'label-tempat' })
+    .bindTooltip(loc.name, { permanent: true, direction: 'right', offset: [0, 0], className: 'label-tempat ' + classKategori })
     .bindPopup(getPopupAwalHTML(index));
 
     if(layerGroups[loc.type]) { marker.addTo(layerGroups[loc.type]); } 
@@ -196,7 +199,7 @@ window.tampilkanDetailBaru = function(index, event) {
         let nomorWA = loc.whatsapp;
         
         // Otomatis ubah angka "0" di depan menjadi "62" agar valid di API WhatsApp
-        if (nomorWA.startsWith('62')) {
+        if (nomorWA.startsWith('0')) {
             nomorWA = '62' + nomorWA.substring(1);
         }
         
@@ -324,12 +327,20 @@ function updateEyeAltitude() {
     const altKm = 40000 / Math.pow(2, zoom);
     document.getElementById('eye-alt').textContent = altKm > 1 ? altKm.toFixed(2) + " km" : (altKm * 1000).toFixed(0) + " m";
     
-    // Logika ala Google Maps: Sembunyikan teks label tempat jika Zoom < 15
-    if (zoom < 15) {
-        document.getElementById('map').classList.add('hide-labels');
-    } else {
-        document.getElementById('map').classList.remove('hide-labels');
+    // REVISI: Logika class zoom untuk menyembunyikan label
+    const mapEl = document.getElementById('map');
+    
+    // Bersihkan status zoom sebelumnya
+    mapEl.classList.remove('zoom-sedang', 'zoom-jauh'); 
+
+    if (zoom === 16) {
+        // Ketinggian ~600m (Zoom 16)
+        mapEl.classList.add('zoom-sedang');
+    } else if (zoom <= 15) {
+        // Ketinggian ~1.22km atau lebih jauh (Zoom 15 ke bawah)
+        mapEl.classList.add('zoom-jauh');
     }
+    // Jika Zoom >= 17 (~300m), peta tidak mendapat class tambahan (tampil semua)
 }
 
 // Fungsi Ringkas untuk mencetak angka ke status bar
@@ -355,41 +366,48 @@ updateEyeAltitude();
 // ==========================================
 // 6. LEGENDA, KOMPAS, & FUNGSI TOGGLE
 // ==========================================
-window.toggleLegenda = function() {
-    const legendContainer = document.querySelector('.legend-container');
-    if (legendContainer) {
-        legendContainer.classList.toggle('show');
-    }
-};
 
-const legend = L.control({ position: 'bottomright' });
-legend.onAdd = function (map) {
-    const div = L.DomUtil.create('div', 'info legend-container');
-    const categories = ["Pusat Pemerintahan", "Fasilitas Ibadah", "Fasilitas Kesehatan", "Fasilitas Pendidikan", "UMKM", "Keamanan Lingkungan"];
-    
-    let content = '<div class="legend-content">';
-    content += '<h4>Legenda <button type="button" class="close-legend-btn" onclick="window.toggleLegenda()">✖</button></h4>';
-    categories.forEach(cat => { content += `<i style="background:${getMarkerColor(cat)}"></i> ${cat}<br>`; });
-    content += '<i style="background:#3498db"></i> Lokasi Anda<br>';
-    content += '<hr style="border: 0; border-top: 1px solid #7f8c8d; margin: 8px 0;">';
-    content += '<i style="background:#2c12f3; height: 4px; margin-top: 7px; border-radius: 0;"></i> Jalan Pantura<br>';
-    content += '<i style="background:#c9a01a; height: 2px; margin-top: 8px; border-radius: 0;"></i> Jalan Desa<br>';
-    content += '<i style="background: transparent; border-top: 3px dashed #b1aeae; height: 0; margin-top: 8px; border-radius: 0;"></i> Batas Administrasi<br>';
-    content += '</div>';
+// (Biarkan kode legend / legenda yang ada di atas ini tetap sama) ...
 
-    let btn = '<button type="button" id="legend-toggle-btn" onclick="window.toggleLegenda()">📜 Legenda</button>';
-
-    div.innerHTML = btn + content;
-    L.DomEvent.disableClickPropagation(div);
-
-    return div;
-};
-legend.addTo(map);
-
+// KOMPAS BARU YANG LEBIH MODERN DAN MENARIK
 const compassControl = L.control({ position: 'topleft' });
 compassControl.onAdd = function (map) {
     const div = L.DomUtil.create('div', 'compass-control');
-    div.innerHTML = `<div style="background: rgba(0, 0, 0, 0.6); padding: 8px; border-radius: 8px; border: 1px solid #7f8c8d; margin-top: 50px;"><svg width="35" height="35" viewBox="0 0 100 100"><polygon points="50,5 30,50 50,45" fill="#e74c3c" /><polygon points="50,5 70,50 50,45" fill="#c0392b" /><polygon points="50,95 30,50 50,55" fill="#ecf0f1" /><polygon points="50,95 70,50 50,55" fill="#bdc3c7" /><text x="50" y="32" font-family="sans-serif" font-size="16" font-weight="bold" fill="#fff" text-anchor="middle">U</text></svg></div>`;
+    
+    // Wadah kompas dengan efek Bulat, Glassmorphism (blur), dan transisi animasi Hover
+    div.innerHTML = `
+    <div style="background: rgba(30, 40, 50, 0.85); backdrop-filter: blur(4px); padding: 6px; border-radius: 50%; border: 2px solid #3498db; margin-top: 55px; margin-left: 5px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; cursor: default; transition: transform 0.3s ease;" 
+         onmouseover="this.style.transform='scale(1.15)'" 
+         onmouseout="this.style.transform='scale(1)'"
+         title="Arah Utara">
+        
+        <!-- Kanvas SVG Kompas -->
+        <svg width="30" height="30" viewBox="0 0 100 100" style="filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.6));">
+            <!-- Cincin Putus-putus Luar -->
+            <circle cx="50" cy="50" r="44" fill="none" stroke="#7f8c8d" stroke-width="2" stroke-dasharray="3 4" />
+            <!-- Cincin Biru Dalam -->
+            <circle cx="50" cy="50" r="36" fill="none" stroke="#3498db" stroke-width="1" opacity="0.6"/>
+            
+            <!-- Jarum Selatan, Timur, Barat (Warna Abu-abu/Silver) -->
+            <polygon points="50,88 43,50 50,55" fill="#ecf0f1" />
+            <polygon points="50,88 57,50 50,55" fill="#95a5a6" />
+            <polygon points="88,50 50,43 55,50" fill="#ecf0f1" />
+            <polygon points="88,50 50,57 55,50" fill="#95a5a6" />
+            <polygon points="12,50 50,43 45,50" fill="#95a5a6" />
+            <polygon points="12,50 50,57 45,50" fill="#ecf0f1" />
+            
+            <!-- Jarum Utara Utama (Merah Terang) -->
+            <polygon points="50,8 38,50 50,44" fill="#e74c3c" />
+            <polygon points="50,8 62,50 50,44" fill="#c0392b" />
+            
+            <!-- Titik Poros Emas di Tengah -->
+            <circle cx="50" cy="50" r="4.5" fill="#f1c40f" />
+            
+            <!-- Label Huruf U (Utara) -->
+            <text x="50" y="32" font-family="'Segoe UI', Tahoma, sans-serif" font-size="18" font-weight="900" fill="#ffffff" text-anchor="middle">U</text>
+        </svg>
+    </div>`;
+    
     return div;
 };
 compassControl.addTo(map);
@@ -518,7 +536,7 @@ const laporControl = L.control({ position: 'topright' });
 
 laporControl.onAdd = function(map) {
     const btn = L.DomUtil.create('button', 'lapor-warga-control');
-    btn.innerHTML = '📢 Lapor Cepat';
+    btn.innerHTML = '📢 Lapor Desa';
     btn.title = 'Klik untuk melaporkan kejadian/masalah di lokasi tertentu';
     
     L.DomEvent.on(btn, 'click', function(e) {
@@ -556,7 +574,8 @@ map.on('click', function(e) {
             // Format link harus berupa "Pre-filled Link" (Dapatkan tautan yang sudah terisi)
             // Ganti "entry.111111" dengan ID isian Latitude dan "entry.222222" dengan ID isian Longitude.
             
-            const formUrl = `https://docs.google.com/forms/d/e/1FAIpQLSfrwrL-MEPQFOiF0iQI94r0ZKtb9r-g7ZEJTj4ABscLoCdoKg/viewform?usp=publish-editor`;
+            // Ganti bagian LAT_DISINI menjadi ${lat} dan LNG_DISINI menjadi ${lng}
+            const formUrl = `https://docs.google.com/forms/d/e/1FAIpQLScA-jsmUPdBB_sa-eftZU5gCZWxMR3q5FDGNQOsRLA1MT_kuw/viewform?usp=pp_url&entry.1856517992=${lat}&entry.1981551024=${lng}`;
             
             // Buka Google Forms di tab baru
             window.open(formUrl, '_blank');
@@ -579,7 +598,7 @@ window.bukaGaleriFoto = function(index, event) {
     }
     
     const loc = locations[index];
-    const kumpulanFoto = [loc.imgBangunan, loc.imgOrang, loc.imgRumah]; 
+    const kumpulanFoto = [loc.imgSatu, loc.imgDua, loc.imgTiga]; 
 
     let modalHTML = `
         <div id="galeri-overlay" class="galeri-overlay">
@@ -614,7 +633,7 @@ window.bukaGaleriFoto = function(index, event) {
                 </div>
                 <!-- AKHIR BUNGKUSAN -->
 
-                <p class="galeri-hint">👆 Geser atau gunakan panah untuk melihat foto</p>
+                <p class="galeri-hint">PICTURE BY TIM KKN UNDIP TULIS 2026</p>
             </div>
         </div>
     `;
