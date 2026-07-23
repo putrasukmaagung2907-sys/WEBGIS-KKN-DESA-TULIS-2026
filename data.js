@@ -21,46 +21,103 @@ const batasDesaData = {
     ]
 };
 
+// ==========================================
+// DATA LOKASI (MULTILINGUAL)
+// ==========================================
 const locations = [
     {
-        name: "Balai Desa", lat: -6.947617, lng: 109.784071, type: "Pusat Pemerintahan",
-        desc: "Pusat administrasi dan pelayanan masyarakat Desa Tulis.",
+        name: "Balai Desa", 
+        lat: -6.947617, lng: 109.784071, 
+        type: "Pusat Pemerintahan",
+        
+        // Bahasa Indonesia
+        desc: "Pusat administrasi dan pelayanan masyarakat Desa Tulis. bcbvhjabhvbasd vbsdhvbiadbvajshdbvhad s vahdvaj vbjaw dvhbasdv sd hasdv asdbvhas d jvbasidbvba dsvhbasd basd asbdv ausbfv hamnsd bi sfjbv ahisf a fvabsfu vajb svascbf afds ia ffdi isfd vsui bahw vhabsd uasdd vasf  jashvdb absdhv asbd ahbsdj vH HDBVAH SJHDVABSFV ADFJH BIADFD  AIDF ASFF VABUISIFD VA SBASFID AH SF HAHHI",
         jamOperasional: "Senin - Jumat (08:00 - 15:00)",
-        whatsapp: "6285624166392", // Kosongkan jika tidak ada
+        
+        // Bahasa Inggris (Tambahan Baru)
+        desc_en: "The central administrative office and public service center of Tulis Village.",
+        jamOperasional_en: "Monday - Friday (08:00 AM - 03:00 PM)",
+        
+        whatsapp: "6285624166392", 
         imgSatu: "A.jpg", imgDua:"B.jpg", imgTiga: "C.jpg"
     },
     {
-        name: "Posyandu", lat: -6.949139, lng: 109.787277, type: "Fasilitas Kesehatan",
+        name: "Posyandu", 
+        lat: -6.949139, lng: 109.787277, 
+        type: "Fasilitas Kesehatan",
+        
+        // Bahasa Indonesia
         desc: "Pelayanan kesehatan tingkat pertama bagi warga.",
         jamOperasional: "5 Jam",
-        whatsapp: "6287810107158", // Format kode negara (62) tanpa plus
+        
+        // Bahasa Inggris (Tambahan Baru)
+        desc_en: "Primary healthcare facility for the local community.",
+        jamOperasional_en: "5 Hours",
+        
+        whatsapp: "6287810107158", 
         imgSatu: "PSYA.jpg", imgDua: "PSYB.jpg", imgTiga: "PSYC.jpg"
     },
     {
-        name: "SDN Tulis 01", lat: -6.949718, lng: 109.788332, type: "Fasilitas Pendidikan",
+        name: "SDN Tulis 01", 
+        lat: -6.949718, lng: 109.788332, 
+        type: "Fasilitas Pendidikan",
+        
+        // Bahasa Indonesia
         desc: "Sekolah Dasar Negeri utama di Desa Tulis.",
         jamOperasional: "Senin - Sabtu (07:00 - 14:00)",
+        
+        // Bahasa Inggris (Tambahan Baru)
+        desc_en: "The main public elementary school in Tulis Village.",
+        jamOperasional_en: "Monday - Saturday (07:00 AM - 02:00 PM)",
+        
         whatsapp: "",
         imgSatu: "SDN1A.jpg", imgDua: "SDN1B.jpg", imgTiga: "SDN1C.jpg"
     },
     {
-        name: "Seblak", lat: -6.949, lng: 109.786, type: "UMKM",
+        name: "Seblak", 
+        lat: -6.949, lng: 109.786, 
+        type: "UMKM",
+        
+        // Bahasa Indonesia
         desc: "Pusat produksi dan penjualan makanan ringan khas Tulis.",
         jamOperasional: "Setiap Hari (09:00 - 21:00)",
+        
+        // Bahasa Inggris (Tambahan Baru)
+        desc_en: "Production and sales center for Tulis' signature local snacks.",
+        jamOperasional_en: "Everyday (09:00 AM - 09:00 PM)",
+        
         whatsapp: "6289876543210",
         imgSatu: "random.jpg", imgDua: "random.jpg", imgTiga: "random.jpg"
     },
     {
-        name: "Poskamling", lat: -6.949591, lng: 109.786011, type: "Keamanan Lingkungan",
+        name: "Poskamling", 
+        lat: -6.949591, lng: 109.786011, 
+        type: "Keamanan Lingkungan",
+        
+        // Bahasa Indonesia
         desc: "Poskamling utama untuk blok utara.",
         jamOperasional: "Pos Siaga 24 Jam",
+        
+        // Bahasa Inggris (Tambahan Baru)
+        desc_en: "The main neighborhood security post for the northern block.",
+        jamOperasional_en: "24-Hour Security Post",
+        
         whatsapp: "",
         imgSatu: "random.jpg", imgDua: "random.jpg", imgTiga: "random.jpg"
     },
     {
-        name: "Masjid Tulis", lat: -6.949011, lng: 109.787278, type: "Fasilitas Ibadah",
+        name: "Masjid Tulis", 
+        lat: -6.949011, lng: 109.787278, 
+        type: "Fasilitas Ibadah",
+        
+        // Bahasa Indonesia
         desc: "Pusat kegiatan ibadah warga sekitar.",
         jamOperasional: "24 Jam",
+        
+        // Bahasa Inggris (Tambahan Baru)
+        desc_en: "The central place of worship for the surrounding community.",
+        jamOperasional_en: "24 Hours",
+        
         whatsapp: "",
         imgSatu: "random.jpg", imgDua: "random.jpg", imgTiga: "random.jpg"
     }

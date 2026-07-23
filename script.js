@@ -1,4 +1,70 @@
 // ==========================================
+// KAMUS BAHASA (DICTIONARY)
+// ==========================================
+let bahasaSaatIni = 'id'; 
+
+const terjemahan = {
+    id: {
+        cariLokasi: "Cari lokasi...",
+        btnLegenda: "📜 Legenda",
+        laporCepat: "📢 Lapor Cepat",
+        laporBatal: "Batalkan Lapor ✖",
+        alertLaporAktif: "Mode Lapor Aktif!\nSilakan klik tepat di lokasi masalah pada peta.",
+        alertLaporKonfirm: "Anda akan melaporkan lokasi pada:\nLintang: {lat}\nBujur: {lng}\n\nLanjutkan mengisi formulir laporan?",
+        alertTungguGPS: "Mohon tunggu sebentar, sistem sedang mencari titik lokasi GPS Anda...",
+        alertTidakKetemu: "Lokasi tidak ditemukan! Pastikan nama tepat.",
+        btnDetail: "Detail⬇️",
+        txtKategori: "Kategori",
+        txtOperasional: "Operasional",
+        txtInfo: "Info",
+        txtKembali: "⬅️ Kembali",
+        txtNavigasi: "Navigasi ke Sini",
+        txtChatWA: "💬 Chat Pemilik/Admin",
+        txtRuteHitung: "Menghitung rute...",
+        txtRuteJarak: "Jarak Tempuh: ",
+        labelLokasiAnda: "Lokasi Anda",
+        labelJalanPantura: "Jalan Pantura",
+        labelJalanDesa: "Jalan Desa",
+        labelBatasAdmin: "Batas Administrasi",
+        katPusatPemerintahan: "Pusat Pemerintahan",
+        katFasilitasIbadah: "Fasilitas Ibadah",
+        katFasilitasKesehatan: "Fasilitas Kesehatan",
+        katFasilitasPendidikan: "Fasilitas Pendidikan",
+        katUMKM: "UMKM",
+        katKeamananLingkungan: "Keamanan Lingkungan"
+    },
+    en: {
+        cariLokasi: "Search location...",
+        btnLegenda: "📜 Legend",
+        laporCepat: "📢 Report Issue",
+        laporBatal: "Cancel Report ✖",
+        alertLaporAktif: "Reporting Mode Active!\nPlease click exactly on the issue location on the map.",
+        alertLaporKonfirm: "You are about to report a location at:\nLatitude: {lat}\nLongitude: {lng}\n\nContinue to the reporting form?",
+        alertTungguGPS: "Please wait, the system is finding your GPS location...",
+        alertTidakKetemu: "Location not found! Please check the spelling.",
+        btnDetail: "Details⬇️",
+        txtKategori: "Category",
+        txtOperasional: "Opening Hours",
+        txtInfo: "Info",
+        txtKembali: "⬅️ Back",
+        txtNavigasi: "Navigate Here",
+        txtChatWA: "💬 Chat Owner/Admin",
+        txtRuteHitung: "Calculating route...",
+        txtRuteJarak: "Distance: ",
+        labelLokasiAnda: "Your Location",
+        labelJalanPantura: "Pantura Road",
+        labelJalanDesa: "Village Road",
+        labelBatasAdmin: "Administrative Boundary",
+        katPusatPemerintahan: "Government Center",
+        katFasilitasIbadah: "Place of Worship",
+        katFasilitasKesehatan: "Health Facility",
+        katFasilitasPendidikan: "Education Facility",
+        katUMKM: "Local Business",
+        katKeamananLingkungan: "Neighborhood Security"
+    }
+};
+
+// ==========================================
 // 1. INISIALISASI PETA & BASEMAPS (Layer Control)
 // ==========================================
 const map = L.map('map', { 
@@ -7,92 +73,61 @@ const map = L.map('map', {
 }).setView([-6.945, 109.785], 15); 
 map.attributionControl.setPrefix('Dibuat oleh Tim KKN Undip Desa Tulis 2026 | <a href="https://leafletjs.com">Leaflet</a>');
 
-// Pilihan Basemap
 const googleSat = L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', { 
-    maxZoom: 20, 
-    attribution: 'Google Satellite',
-    keepBuffer: 4,
-    updateWhenZooming: false
+    maxZoom: 20, attribution: 'Google Satellite', keepBuffer: 4, updateWhenZooming: false
 }).addTo(map);
 
 const osmStreet = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { 
-    maxZoom: 19, 
-    attribution: 'OpenStreetMap',
-    keepBuffer: 4,
-    updateWhenZooming: false
+    maxZoom: 19, attribution: 'OpenStreetMap', keepBuffer: 4, updateWhenZooming: false
 });
 
-L.control.layers({
-    "Citra Satelit": googleSat,
-    "Peta Jalan": osmStreet
-}, null, { position: 'topleft' }).addTo(map);
+L.control.layers({ "Citra Satelit": googleSat, "Peta Jalan": osmStreet }, null, { position: 'topleft' }).addTo(map);
 
 let routingControl = null;
-
-// HAPUS LOKASI OFFLINE: Biarkan kosong agar murni menunggu lokasi dari device pengguna
 let currentLat = null; 
 let currentLng = null;
-let userMarker = null; // Marker biru belum dibuat sebelum lokasi nyata ditemukan
+let userMarker = null; 
 
 map.on('dblclick', function() {
-    if (routingControl) {
-        map.removeControl(routingControl);
-        routingControl = null;
-    }
+    if (routingControl) { map.removeControl(routingControl); routingControl = null; }
     const infoPanel = document.getElementById('route-info');
     if (infoPanel) infoPanel.style.display = 'none'; 
 });
 
-
 // ==========================================
 // 2. SET LOKASI SAYA (BERDASARKAN QR CODE / URL PARAMETER)
 // ==========================================
-
-// Fungsi pembaca parameter dari URL (?lat=...&lng=...)
 function getUrlParameter(name) {
     const urlParams = new URLSearchParams(window.location.search);
     return urlParams.get(name);
 }
 
-// Menangkap data dari hasil scan QR Code
 const qrLat = getUrlParameter('lat');
 const qrLng = getUrlParameter('lng');
 const qrDusun = getUrlParameter('dusun');
 
-// SKENARIO 1: PENGUNJUNG SCAN BARKODE DARI TIANG
 if (qrLat && qrLng) {
     currentLat = parseFloat(qrLat);
     currentLng = parseFloat(qrLng);
-    
     let namaLabel = qrDusun ? "Posisi Anda (Tiang Dusun " + qrDusun + ")" : "Posisi Anda (Tiang)";
     
-    // Buat marker statis warna oranye agar beda dengan GPS realtime
     userMarker = L.circleMarker([currentLat, currentLng], {
         radius: 8, fillColor: "#e67e22", color: "#ffffff", weight: 2, fillOpacity: 1, zIndexOffset: 1000
     }).addTo(map).bindTooltip(namaLabel, { permanent: true, direction: 'right', offset: [5, 0], className: 'label-tempat' });
-    
-    // Arahkan pandangan peta langsung menukik ke lokasi tiang tersebut
     map.setView([currentLat, currentLng], 17);
-
-} 
-// SKENARIO 2: PENGUNJUNG BUKA WEB BIASA (BUKAN DARI SCAN TIANG)
-else {
+} else {
     function onLocationFound(e) {
         currentLat = e.latlng.lat;
         currentLng = e.latlng.lng;
-        
         if (!userMarker) {
             userMarker = L.circleMarker([currentLat, currentLng], {
                 radius: 7, fillColor: "#3498db", color: "#ffffff", weight: 2, fillOpacity: 1, zIndexOffset: 1000
-            }).addTo(map).bindTooltip("Lokasi Anda", { permanent: true, direction: 'right', offset: [5, 0], className: 'label-tempat' });
+            }).addTo(map).bindTooltip(() => terjemahan[bahasaSaatIni].labelLokasiAnda, { permanent: true, direction: 'right', offset: [5, 0], className: 'label-tempat' });
         } else {
             userMarker.setLatLng(e.latlng);
         }
     }
-
-    function onLocationError(e) {
-        if (e.code !== 3) console.warn("GPS terhambat: " + e.message);
-    }
+    function onLocationError(e) { if (e.code !== 3) console.warn("GPS terhambat: " + e.message); }
 
     map.on('locationfound', onLocationFound);
     map.on('locationerror', onLocationError);
@@ -120,13 +155,10 @@ function konversiKoordinat(coords) {
     return L.latLng(converted[1], converted[0]);
 }
 
-// Garis Tepi Desa Putus-putus
 L.geoJSON(batasDesaData, {
-    pane: 'paneBatasDesa',
-    smoothFactor: 2.0,
+    pane: 'paneBatasDesa', smoothFactor: 2.0,
     style: function(feature) { return { color: "#f9f9f9", weight: 3, fillOpacity: 0, dashArray: "5, 5" }; }
 }).addTo(map);
-
 
 // ==========================================
 // 4. GROUPING, FILTERING & MARKER CLUSTER
@@ -143,17 +175,11 @@ const layerGroups = {
 };
 
 L.geoJSON(jalanDesaData, { 
-    pane: 'paneJalanDesa', 
-    coordsToLatLng: konversiKoordinat, 
-    smoothFactor: 1.5,
-    style: { color: "#c9a01a", weight: 3, opacity: 0.8 } 
+    pane: 'paneJalanDesa', coordsToLatLng: konversiKoordinat, smoothFactor: 1.5, style: { color: "#c9a01a", weight: 3, opacity: 0.8 } 
 }).addTo(layerGroups["Jalan Desa"]);
 
 L.geoJSON(jalanPanturaData, { 
-    pane: 'paneJalanPantura', 
-    coordsToLatLng: konversiKoordinat, 
-    smoothFactor: 1.5,
-    style: { color: "#2c12f3", weight: 6, opacity: 0.9 } 
+    pane: 'paneJalanPantura', coordsToLatLng: konversiKoordinat, smoothFactor: 1.5, style: { color: "#2c12f3", weight: 6, opacity: 0.9 } 
 }).bindTooltip("Jl. PANTURA", { sticky: true, className: 'label-tempat' }).addTo(layerGroups["Jalan Pantura"]);
 
 function getMarkerColor(kategori) {
@@ -164,27 +190,23 @@ function getMarkerColor(kategori) {
     }
 }
 
-// Data Array untuk Search
 let searchData = [];
 
-// FUNGSI BANTUAN UNTUK GENERATE HTML POPUP AWAL
 function getPopupAwalHTML(index) {
     const loc = locations[index];
+    const t = terjemahan[bahasaSaatIni];
     return `
         <div class="popup-content" style="text-align: center; min-width: 150px;">
             <h3 style="margin-bottom: 8px; border-bottom: 2px solid #5e3ce7; padding-bottom: 5px;">${loc.name}</h3>
-            <button class="btn-detail-popup" onclick="window.tampilkanDetailBaru(${index}, event)">Detail⬇️</button>
+            <button class="btn-detail-popup" onclick="window.tampilkanDetailBaru(${index}, event)">${t.btnDetail}</button>
         </div>
     `;
 }
 
 locations.forEach((loc, index) => {
     const markerColor = getMarkerColor(loc.type);
-    
-    // TAMBAHAN: Buat class CSS otomatis dari kategori (misal: "UMKM" jadi "label-umkm")
     const classKategori = 'label-' + loc.type.toLowerCase().replace(/\s+/g, '-');
     
-    // Label permanen dengan offset untuk mencegah tumpang tindih dengan titik merah
     const marker = L.circleMarker([loc.lat, loc.lng], {
         radius: 6, fillColor: markerColor, color: "#ffffff", weight: 1.5, fillOpacity: 1
     })
@@ -192,95 +214,73 @@ locations.forEach((loc, index) => {
     .bindPopup(getPopupAwalHTML(index));
 
     if(layerGroups[loc.type]) { marker.addTo(layerGroups[loc.type]); } 
-    
-    // Simpan referensi marker
     searchData.push({ name: loc.name.toLowerCase(), marker: marker, lat: loc.lat, lng: loc.lng });
 
-    // Reset popup ke tampilan awal jika disilang/ditutup
     marker.on('popupclose', function() {
-        setTimeout(() => {
-            marker.setPopupContent(getPopupAwalHTML(index));
-        }, 300);
+        setTimeout(() => { marker.setPopupContent(getPopupAwalHTML(index)); }, 300);
     });
 });
 
-// ==========================================
-// FUNGSI GLOBAL UNTUK BERALIH POPUP
-// ==========================================
-
 window.tampilkanDetailBaru = function(index, event) {
-    if (event) {
-        event.stopPropagation();
-        event.preventDefault();
-    }
-
+    if (event) { event.stopPropagation(); event.preventDefault(); }
     const loc = locations[index];
     const marker = searchData[index].marker;
+    const t = terjemahan[bahasaSaatIni];
     
-    // ==========================================
-    // PERBAIKAN: Logika Tombol WhatsApp
-    // ==========================================
+    // Logika Penggantian Bahasa pada Data JSON
+    const deskripsi = (bahasaSaatIni === 'en' && loc.desc_en) ? loc.desc_en : loc.desc;
+    const operasional = (bahasaSaatIni === 'en' && loc.jamOperasional_en) ? loc.jamOperasional_en : loc.jamOperasional;
+    const katName = t["kat" + loc.type.replace(/\s+/g, '')] || loc.type;
+
     let waButtonHTML = '';
     if (loc.whatsapp) {
-        let nomorWA = loc.whatsapp;
-        
-        // Otomatis ubah angka "0" di depan menjadi "62" agar valid di API WhatsApp
-        if (nomorWA.startsWith('0')) {
-            nomorWA = '62' + nomorWA.substring(1);
-        }
-        
-        // Menggunakan <button> dan window.open untuk mencegah "mental" di layar HP
-        waButtonHTML = `<button type="button" class="wa-btn" onclick="window.open('https://wa.me/${nomorWA}', '_blank', 'noopener,noreferrer'); event.stopPropagation();">💬 Chat Pemilik/Admin</button>`;
+        let nomorWA = loc.whatsapp.startsWith('0') ? '62' + loc.whatsapp.substring(1) : loc.whatsapp;
+        waButtonHTML = `<button type="button" class="wa-btn" onclick="window.open('https://wa.me/${nomorWA}', '_blank'); event.stopPropagation();">${t.txtChatWA}</button>`;
     }
     
-    // PERUBAHAN: Tombol ikon kamera kini sejajar dengan judul di kanan atas
     const detailHTML = `
-        <div class="popup-content" style="position: relative; min-width: 220px; text-align: left;">
+        <div class="popup-content" style="position: relative; min-width: 220px; max-width: 280px; text-align: left;">
             <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e74c3c; padding-bottom: 5px; margin-bottom: 10px;">
-                <h3 style="margin: 0; border: none; padding: 0;">${loc.name}</h3>
+                <h3 style="margin: 0; border: none; padding: 0; font-size: 15px;">${loc.name}</h3>
                 <button onclick="window.bukaGaleriFoto(${index}, event)" class="btn-lihat-foto" title="Lihat Foto Lokasi">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
-                        <circle cx="12" cy="13" r="4"></circle>
+                        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle>
                     </svg>
                 </button>
             </div>
             
-            <p><strong>Kategori:</strong> ${loc.type}</p>
-            <p><strong>Operasional:</strong> ${loc.jamOperasional}</p>
-            <p><strong>Info:</strong> ${loc.desc}</p>
+            <div style="margin-bottom: 4px; font-size: 13px;"><strong>${t.txtKategori}:</strong> ${katName}</div>
+            <div style="margin-bottom: 4px; font-size: 13px;"><strong>${t.txtOperasional}:</strong> ${operasional}</div>
+            
+            <!-- PERBAIKAN DI SINI: Area Deskripsi Dibuat Scrollable (~5 Baris) -->
+            <div style="max-height: 85px; overflow-y: auto; overflow-wrap: break-word; word-wrap: break-word; padding-right: 5px; margin-bottom: 10px; font-size: 13px; line-height: 1.4; background: rgba(0,0,0,0.03); padding: 5px; border-radius: 4px;">
+                <strong>${t.txtInfo}:</strong> ${deskripsi}
+            </div>
+            
             ${waButtonHTML}
             
-            <div style="margin-top: 15px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #bdc3c7; padding-top: 8px;">
-                <button onclick="window.kembaliKeAwal(${index}, event)" style="background: #7f8c8d; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold;">⬅️ Kembali</button>
-                
-                <button onclick="window.buatRute(${index}, event)" title="Navigasi ke Sini" style="background-color: #3498db; color: white; border: none; border-radius: 50%; width: 34px; height: 34px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">
+            <div style="margin-top: 12px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #bdc3c7; padding-top: 8px;">
+                <button onclick="window.kembaliKeAwal(${index}, event)" style="background: #7f8c8d; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold;">${t.txtKembali}</button>
+                <button onclick="window.buatRute(${index}, event)" title="${t.txtNavigasi}" style="background-color: #3498db; color: white; border: none; border-radius: 50%; width: 34px; height: 34px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="3 11 22 2 13 21 11 13 3 11"></polygon></svg>
                 </button>
             </div>
         </div>
     `;
-    
     marker.setPopupContent(detailHTML);
 };
 
 window.kembaliKeAwal = function(index, event) {
-    if (event) {
-        event.stopPropagation();
-        event.preventDefault();
-    }
+    if (event) { event.stopPropagation(); event.preventDefault(); }
     searchData[index].marker.setPopupContent(getPopupAwalHTML(index));
 };
 
 window.buatRute = function(index, event) {
-    if (event) {
-        event.stopPropagation();
-        event.preventDefault();
-    }
+    if (event) { event.stopPropagation(); event.preventDefault(); }
+    const t = terjemahan[bahasaSaatIni];
 
-    // Cek apakah sinyal GPS sudah didapat
     if (!currentLat || !currentLng) {
-        alert("Mohon tunggu sebentar, sistem sedang mencari titik lokasi GPS Anda...");
+        alert(t.alertTungguGPS);
         return; 
     }
 
@@ -288,11 +288,11 @@ window.buatRute = function(index, event) {
     if (routingControl) map.removeControl(routingControl);
     
     const infoPanel = document.getElementById('route-info');
-    if (infoPanel) { infoPanel.innerHTML = "Menghitung rute..."; infoPanel.style.display = 'block'; }
+    if (infoPanel) { infoPanel.innerHTML = t.txtRuteHitung; infoPanel.style.display = 'block'; }
 
     routingControl = L.Routing.control({
         waypoints: [ L.latLng(currentLat, currentLng), L.latLng(loc.lat, loc.lng) ], 
-        router: L.Routing.osrmv1({ language: 'id', profile: 'driving' }),
+        router: L.Routing.osrmv1({ language: bahasaSaatIni, profile: 'driving' }),
         addWaypoints: false, 
         routeLine: function(route, options) {
             return L.Routing.line(route, { addWaypoints: false, extendToWaypoints: true, styles: [{ color: '#0ec733', opacity: 0.9, weight: 8 }] });
@@ -303,14 +303,10 @@ window.buatRute = function(index, event) {
     routingControl.on('routesfound', function(e) {
         const distanceMeters = e.routes[0].summary.totalDistance;
         let distanceString = distanceMeters > 1000 ? (distanceMeters / 1000).toFixed(2) + ' km' : Math.round(distanceMeters) + ' meter';
-        if (infoPanel) infoPanel.innerHTML = "Jarak Tempuh: <b>" + distanceString + "</b>";
+        if (infoPanel) infoPanel.innerHTML = "<b>" + t.txtRuteJarak + distanceString + "</b>";
     });
 };
 
-
-// ==========================================
-// FITUR SEARCH & FILTER PANEL
-// ==========================================
 document.getElementById('search-btn').addEventListener('click', function() {
     let query = document.getElementById('search-input').value.toLowerCase();
     let found = searchData.find(item => item.name.includes(query));
@@ -319,7 +315,7 @@ document.getElementById('search-btn').addEventListener('click', function() {
         map.flyTo([found.lat, found.lng], 18, { animate: true, duration: 1.5 });
         setTimeout(() => found.marker.openPopup(), 1500);
     } else {
-        alert("Lokasi tidak ditemukan! Pastikan nama tepat.");
+        alert(terjemahan[bahasaSaatIni].alertTidakKetemu);
     }
 });
 
@@ -335,7 +331,6 @@ document.querySelectorAll('.filter-btn').forEach(btn => {
 const filterToggleBtn = document.getElementById('filter-toggle-btn');
 const filterPanel = document.getElementById('filter-panel');
 if (filterToggleBtn && filterPanel) { filterToggleBtn.addEventListener('click', (e) => { e.stopPropagation(); filterPanel.classList.toggle('show'); }); }
-
 
 // ==========================================
 // 5. STATUS BAR ALA GOOGLE EARTH
@@ -353,88 +348,68 @@ function updateEyeAltitude() {
     const altKm = 40000 / Math.pow(2, zoom);
     document.getElementById('eye-alt').textContent = altKm > 1 ? altKm.toFixed(2) + " km" : (altKm * 1000).toFixed(0) + " m";
     
-    // REVISI: Logika class zoom untuk menyembunyikan label
     const mapEl = document.getElementById('map');
-    
-    // Bersihkan status zoom sebelumnya
     mapEl.classList.remove('zoom-sedang', 'zoom-jauh'); 
-
-    if (zoom === 16) {
-        // Ketinggian ~600m (Zoom 16)
-        mapEl.classList.add('zoom-sedang');
-    } else if (zoom <= 15) {
-        // Ketinggian ~1.22km atau lebih jauh (Zoom 15 ke bawah)
-        mapEl.classList.add('zoom-jauh');
-    }
-    // Jika Zoom >= 17 (~300m), peta tidak mendapat class tambahan (tampil semua)
+    if (zoom === 16) { mapEl.classList.add('zoom-sedang'); } 
+    else if (zoom <= 15) { mapEl.classList.add('zoom-jauh'); }
 }
 
-// Fungsi Ringkas untuk mencetak angka ke status bar
 function perbaruiKoordinatBar(latlng) {
     document.getElementById('coord-lat').textContent = toDMS(latlng.lat, true);
     document.getElementById('coord-lng').textContent = toDMS(latlng.lng, false);
 }
 
-// 1. UNTUK DESKTOP (Komputer): Baca ujung panah mouse
-map.on('mousemove', function(e) {
-    perbaruiKoordinatBar(e.latlng);
-});
-
-// 2. UNTUK HP (Layar Sentuh): Baca titik tengah layar saat peta digeser/cubit
-map.on('move', function() {
-    perbaruiKoordinatBar(map.getCenter());
-});
-
+map.on('mousemove', function(e) { perbaruiKoordinatBar(e.latlng); });
+map.on('move', function() { perbaruiKoordinatBar(map.getCenter()); });
 map.on('zoomend', updateEyeAltitude);
 updateEyeAltitude();
-
 
 // ==========================================
 // 6. LEGENDA, KOMPAS, & FUNGSI TOGGLE
 // ==========================================
 window.toggleLegenda = function() {
     const legendContainer = document.querySelector('.legend-container');
-    if (legendContainer) {
-        legendContainer.classList.toggle('show');
-    }
+    if (legendContainer) { legendContainer.classList.toggle('show'); }
+};
+
+window.renderLegendaHTML = function() {
+    const t = terjemahan[bahasaSaatIni];
+    const categories = ["Pusat Pemerintahan", "Fasilitas Ibadah", "Fasilitas Kesehatan", "Fasilitas Pendidikan", "UMKM", "Keamanan Lingkungan"];
+    
+    let content = '<div class="legend-content">';
+    content += `<h4>${t.btnLegenda.replace('📜 ', '')} <button type="button" class="close-legend-btn" onclick="window.toggleLegenda()">✖</button></h4>`;
+    categories.forEach(cat => { 
+        let katName = t["kat" + cat.replace(/\s+/g, '')] || cat;
+        content += `<i style="background:${getMarkerColor(cat)}"></i> ${katName}<br>`; 
+    });
+    content += `<i style="background:#3498db"></i> ${t.labelLokasiAnda}<br>`;
+    content += '<hr style="border: 0; border-top: 1px solid #7f8c8d; margin: 8px 0;">';
+    content += `<i style="background:#2c12f3; height: 4px; margin-top: 7px; border-radius: 0;"></i> ${t.labelJalanPantura}<br>`;
+    content += `<i style="background:#c9a01a; height: 2px; margin-top: 8px; border-radius: 0;"></i> ${t.labelJalanDesa}<br>`;
+    content += `<i style="background: transparent; border-top: 3px dashed #b1aeae; height: 0; margin-top: 8px; border-radius: 0;"></i> ${t.labelBatasAdmin}<br>`;
+    content += '</div>';
+
+    let btn = `<button type="button" id="legend-toggle-btn" onclick="window.toggleLegenda()">${t.btnLegenda}</button>`;
+    
+    const div = document.querySelector('.legend-container');
+    if(div) { div.innerHTML = btn + content; }
 };
 
 const legend = L.control({ position: 'bottomright' });
 legend.onAdd = function (map) {
     const div = L.DomUtil.create('div', 'info legend-container');
-    const categories = ["Pusat Pemerintahan", "Fasilitas Ibadah", "Fasilitas Kesehatan", "Fasilitas Pendidikan", "UMKM", "Keamanan Lingkungan"];
-    
-    let content = '<div class="legend-content">';
-    content += '<h4>Legenda <button type="button" class="close-legend-btn" onclick="window.toggleLegenda()">✖</button></h4>';
-    categories.forEach(cat => { content += `<i style="background:${getMarkerColor(cat)}"></i> ${cat}<br>`; });
-    content += '<i style="background:#3498db"></i> Lokasi Anda<br>';
-    content += '<hr style="border: 0; border-top: 1px solid #7f8c8d; margin: 8px 0;">';
-    content += '<i style="background:#2c12f3; height: 4px; margin-top: 7px; border-radius: 0;"></i> Jalan Pantura<br>';
-    content += '<i style="background:#c9a01a; height: 2px; margin-top: 8px; border-radius: 0;"></i> Jalan Desa<br>';
-    content += '<i style="background: transparent; border-top: 3px dashed #b1aeae; height: 0; margin-top: 8px; border-radius: 0;"></i> Batas Administrasi<br>';
-    content += '</div>';
-
-    let btn = '<button type="button" id="legend-toggle-btn" onclick="window.toggleLegenda()">📜 Legenda</button>';
-
-    div.innerHTML = btn + content;
+    setTimeout(window.renderLegendaHTML, 100); 
     L.DomEvent.disableClickPropagation(div);
-
     return div;
 };
 legend.addTo(map);
 
-// KOMPAS BARU YANG LEBIH MODERN DAN MENARIK
 const compassControl = L.control({ position: 'topleft' });
 compassControl.onAdd = function (map) {
     const div = L.DomUtil.create('div', 'compass-control');
-    
-    // margin-top: 10px dan margin-left: 2px agar pas di bawah tombol Geoman
     div.innerHTML = `
     <div style="background: rgba(30, 40, 50, 0.85); backdrop-filter: blur(4px); padding: 6px; border-radius: 50%; border: 2px solid #3498db; margin-top: 10px; margin-left: 2px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; cursor: default; transition: transform 0.3s ease;" 
-         onmouseover="this.style.transform='scale(1.15)'" 
-         onmouseout="this.style.transform='scale(1)'"
-         title="Arah Utara">
-        
+         onmouseover="this.style.transform='scale(1.15)'" onmouseout="this.style.transform='scale(1)'">
         <svg width="30" height="30" viewBox="0 0 100 100" style="filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.6));">
             <circle cx="50" cy="50" r="44" fill="none" stroke="#7f8c8d" stroke-width="2" stroke-dasharray="3 4" />
             <circle cx="50" cy="50" r="36" fill="none" stroke="#3498db" stroke-width="1" opacity="0.6"/>
@@ -450,7 +425,6 @@ compassControl.onAdd = function (map) {
             <text x="50" y="32" font-family="'Segoe UI', Tahoma, sans-serif" font-size="18" font-weight="900" fill="#ffffff" text-anchor="middle">U</text>
         </svg>
     </div>`;
-    
     return div;
 };
 compassControl.addTo(map);
@@ -458,188 +432,141 @@ compassControl.addTo(map);
 // ==========================================
 // 7. FITUR ALAT UKUR PRESISI (LEAFLET-GEOMAN)
 // ==========================================
+map.eachLayer(function(layer) { layer.options.pmIgnore = true; });
 
-// 1. KUNCI LAYER BAWAAN (Batas Administrasi & Marker Lama)
-// Script ini membuat alat hapus Geoman mengabaikan semua layer yang sudah ada di peta,
-// sehingga batas desa Anda tidak akan ikut terhapus.
-map.eachLayer(function(layer) {
-    layer.options.pmIgnore = true;
-});
-
-// 2. TAMBAHKAN KONTROL DIGITASI
 map.pm.addControls({
-    position: 'topleft',
-    drawMarker: false,
-    drawCircleMarker: false,
-    drawPolyline: true,     // Tool ukur jarak (Garis)
-    drawRectangle: false,
-    drawPolygon: true,      // Tool ukur luas (Poligon)
-    drawCircle: false,
-    drawText: false,
-    editMode: false,
-    dragMode: false,
-    cutPolygon: false,
-    removalMode: true       // Tool hapus
+    position: 'topleft', drawMarker: false, drawCircleMarker: false, drawPolyline: true, drawRectangle: false,
+    drawPolygon: true, drawCircle: false, drawText: false, editMode: false, dragMode: false, cutPolygon: false, removalMode: true       
 });
 
-// 3. KONFIGURASI VISUAL & SISTEM METRIK
 map.pm.setGlobalOptions({ 
     measurements: { measurement: true, displayFormat: 'metric' },
-    tooltips: true,
-    hintlineStyle: { color: '#e74c3c', dashArray: '5,5' },
-    templineStyle: { color: '#e74c3c' },
-    pathOptions: { color: '#3498db', fillColor: '#3498db', fillOpacity: 0.4 }
+    tooltips: true, hintlineStyle: { color: '#e74c3c', dashArray: '5,5' }, templineStyle: { color: '#e74c3c' }, pathOptions: { color: '#3498db', fillColor: '#3498db', fillOpacity: 0.4 }
 });
 
-// 4. MUNCULKAN POPUP UKURAN PERMANEN SETELAH SELESAI MENGGAMBAR
 map.on('pm:create', function(e) {
     var layer = e.layer;
-    
-    // Izinkan garis/poligon yang BARU digambar ini untuk bisa dihapus oleh user
     layer.options.pmIgnore = false; 
     
-    // Coba ambil teks ukuran dari sistem Geoman (jika berhasil)
     var hasilUkuran = "";
-    if (layer.getTooltip && layer.getTooltip()) {
-        hasilUkuran = layer.getTooltip().getContent();
-    }
+    if (layer.getTooltip && layer.getTooltip()) { hasilUkuran = layer.getTooltip().getContent(); }
 
-    // FALLBACK 1: Jika menggambar GARIS (Jarak)
     if (e.shape === 'Line' && (!hasilUkuran || hasilUkuran === "")) {
         var latlngs = layer.getLatLngs();
         var distance = 0;
-        for (var i = 0; i < latlngs.length - 1; i++) {
-            distance += latlngs[i].distanceTo(latlngs[i + 1]);
-        }
-        
+        for (var i = 0; i < latlngs.length - 1; i++) { distance += latlngs[i].distanceTo(latlngs[i + 1]); }
         var distanceMeter = Math.round(distance).toLocaleString('id-ID');
-        
-        // Tampilkan Kilometer dan Meter jika jaraknya jauh
-        if (distance >= 1000) {
-            var distanceKm = (distance / 1000).toFixed(2);
-            hasilUkuran = distanceKm + " km<br><span style='font-size:12px; font-weight:normal;'>(" + distanceMeter + " meter)</span>";
-        } else {
-            hasilUkuran = distanceMeter + " meter";
-        }
+        if (distance >= 1000) { var distanceKm = (distance / 1000).toFixed(2); hasilUkuran = distanceKm + " km<br><span style='font-size:12px; font-weight:normal;'>(" + distanceMeter + " meter)</span>"; } 
+        else { hasilUkuran = distanceMeter + " meter"; }
     }
 
-    // FALLBACK 2: Jika menggambar POLIGON (Luas Area)
     if (e.shape === 'Polygon' && (!hasilUkuran || hasilUkuran === "")) {
-        // Mengambil titik sudut luar poligon
         var latlngs = layer.getLatLngs()[0]; 
         var area = 0;
-        
         var d2r = Math.PI / 180; 
-        var R = 6378137; // Jari-jari bumi
+        var R = 6378137; 
         
         if (latlngs.length > 2) {
             for (var i = 0; i < latlngs.length; i++) {
-                var p1 = latlngs[i];
-                var p2 = latlngs[(i + 1) % latlngs.length];
-                area += ((p2.lng - p1.lng) * d2r) *
-                        (2 + Math.sin(p1.lat * d2r) + Math.sin(p2.lat * d2r));
+                var p1 = latlngs[i]; var p2 = latlngs[(i + 1) % latlngs.length];
+                area += ((p2.lng - p1.lng) * d2r) * (2 + Math.sin(p1.lat * d2r) + Math.sin(p2.lat * d2r));
             }
             area = Math.abs(area * R * R / 2.0);
         }
-
-        // Format angka dengan titik sebagai pemisah ribuan (contoh: 15.000)
         var areaMeter = Math.round(area).toLocaleString('id-ID');
-
-        // Tampilkan Hektar dan Meter Persegi sekaligus jika luas > 10.000
-        if (area >= 10000) {
-            var areaHektar = (area / 10000).toFixed(2);
-            hasilUkuran = areaHektar + " ha<br><span style='font-size:12px; font-weight:normal;'>(" + areaMeter + " meter persegi)</span>";
-        } else {
-            // Tampilkan hanya meter persegi jika lahan lebih kecil dari 1 hektar
-            hasilUkuran = areaMeter + " meter persegi"; 
-        }
+        if (area >= 10000) { var areaHektar = (area / 10000).toFixed(2); hasilUkuran = areaHektar + " ha<br><span style='font-size:12px; font-weight:normal;'>(" + areaMeter + " meter persegi)</span>"; } 
+        else { hasilUkuran = areaMeter + " meter persegi"; }
     }
 
-    // Ikat hasil ukuran ke dalam Popup lalu buka secara otomatis
     if (hasilUkuran) {
-        layer.bindPopup(
-            "<div style='font-size:14px; text-align:center; padding:5px;'>" +
-            "<span style='color:#7f8c8d; font-size:12px; display:block; margin-bottom:3px;'>Hasil Ukuran:</span>" +
-            "<b>" + hasilUkuran + "</b>" +
-            "</div>"
-        ).openPopup();
-    } else {
-        layer.bindPopup("<b>Area berhasil dipetakan.</b>").openPopup();
-    }
+        layer.bindPopup("<div style='font-size:14px; text-align:center; padding:5px;'><span style='color:#7f8c8d; font-size:12px; display:block; margin-bottom:3px;'>Hasil Ukuran:</span><b>" + hasilUkuran + "</b></div>").openPopup();
+    } else { layer.bindPopup("<b>Area berhasil dipetakan.</b>").openPopup(); }
 });
 
-
 // ==========================================
-// 8. FITUR LAPOR WARGA (GOOGLE FORMS CROWDSOURCING)
+// 8. FITUR LAPOR WARGA & TOGGLE BAHASA
 // ==========================================
 let isReportingMode = false;
-
-// Membuat tombol kontrol custom di peta
 const laporControl = L.control({ position: 'topright' });
 
 laporControl.onAdd = function(map) {
     const btn = L.DomUtil.create('button', 'lapor-warga-control');
-    btn.innerHTML = '📢 Lapor Desa';
-    btn.title = 'Klik untuk melaporkan kejadian/masalah di lokasi tertentu';
+    btn.innerHTML = terjemahan[bahasaSaatIni].laporCepat;
     
     L.DomEvent.on(btn, 'click', function(e) {
-        L.DomEvent.stopPropagation(e); // Cegah peta ikut terklik
-        isReportingMode = !isReportingMode; // Toggle mode on/off
+        L.DomEvent.stopPropagation(e); 
+        isReportingMode = !isReportingMode; 
+        const t = terjemahan[bahasaSaatIni];
         
         if (isReportingMode) {
-            btn.innerHTML = 'Batalkan Lapor ✖';
+            btn.innerHTML = t.laporBatal;
             btn.classList.add('active');
             document.getElementById('map').classList.add('reporting-mode');
-            alert("Mode Lapor Aktif!\nSilakan klik tepat di lokasi masalah pada peta.");
+            alert(t.alertLaporAktif);
         } else {
-            btn.innerHTML = '📢 Lapor Cepat';
+            btn.innerHTML = t.laporCepat;
             btn.classList.remove('active');
             document.getElementById('map').classList.remove('reporting-mode');
         }
     });
-    
     return btn;
 };
 laporControl.addTo(map);
 
-// Aksi yang terjadi ketika peta diklik saat mode lapor sedang ON
 map.on('click', function(e) {
     if (isReportingMode) {
         const lat = e.latlng.lat.toFixed(6);
         const lng = e.latlng.lng.toFixed(6);
+        const t = terjemahan[bahasaSaatIni];
         
-        // Popup konfirmasi sebelum dilempar ke Google Forms
-        if(confirm(`Anda akan melaporkan lokasi pada:\nLintang: ${lat}\nBujur: ${lng}\n\nLanjutkan mengisi formulir laporan?`)) {
-            
-            // ============================================================
-            // PERHATIAN: GANTI URL DI BAWAH INI DENGAN LINK GOOGLE FORM ANDA
-            // ============================================================
-            // Format link harus berupa "Pre-filled Link" (Dapatkan tautan yang sudah terisi)
-            // Ganti "entry.111111" dengan ID isian Latitude dan "entry.222222" dengan ID isian Longitude.
-            
-            // Ganti bagian LAT_DISINI menjadi ${lat} dan LNG_DISINI menjadi ${lng}
+        let pesanKonfirmasi = t.alertLaporKonfirm.replace('{lat}', lat).replace('{lng}', lng);
+        
+        if(confirm(pesanKonfirmasi)) {
             const formUrl = `https://docs.google.com/forms/d/e/1FAIpQLScA-jsmUPdBB_sa-eftZU5gCZWxMR3q5FDGNQOsRLA1MT_kuw/viewform?usp=pp_url&entry.1856517992=${lat}&entry.1981551024=${lng}`;
-            
-            // Buka Google Forms di tab baru
             window.open(formUrl, '_blank');
             
-            // Matikan mode lapor otomatis setelah klik
             isReportingMode = false;
             const btn = document.querySelector('.lapor-warga-control');
-            btn.innerHTML = '📢 Lapor Cepat';
+            btn.innerHTML = t.laporCepat;
             btn.classList.remove('active');
             document.getElementById('map').classList.remove('reporting-mode');
         }
     }
 });
 
-// Fungsi untuk membuka layar penuh galeri foto
-window.bukaGaleriFoto = function(index, event) {
-    if (event) {
-        event.stopPropagation();
-        event.preventDefault();
+// LOGIKA UTAMA: TOMBOL PENGUBAH BAHASA (UI/UX)
+window.toggleBahasa = function() {
+    bahasaSaatIni = bahasaSaatIni === 'id' ? 'en' : 'id';
+    const t = terjemahan[bahasaSaatIni];
+
+    // 1. Ubah Placeholder Search
+    const searchInput = document.getElementById('search-input');
+    if(searchInput) searchInput.placeholder = t.cariLokasi;
+    
+    // 2. Ubah Teks Tombol Lapor
+    const laporBtn = document.querySelector('.lapor-warga-control');
+    if(laporBtn) { laporBtn.innerHTML = isReportingMode ? t.laporBatal : t.laporCepat; }
+    
+    // 3. Render Ulang Legenda
+    window.renderLegendaHTML();
+    
+    // 4. Tutup Popup yang Sedang Terbuka (agar saat dibuka lagi menyesuaikan bahasa baru)
+    map.closePopup();
+
+    // 5. Ubah label Lokasi Anda pada userMarker (jika aktif)
+    if (userMarker) {
+       userMarker.setTooltipContent(t.labelLokasiAnda);
     }
     
+    // Ganti teks pada tombol pengganti
+    document.getElementById('btn-bahasa').innerText = bahasaSaatIni === 'id' ? "🌐 ID / EN" : "🌐 EN / ID";
+};
+
+// ==========================================
+// 9. GALERI FOTO
+// ==========================================
+window.bukaGaleriFoto = function(index, event) {
+    if (event) { event.stopPropagation(); event.preventDefault(); }
     const loc = locations[index];
     const kumpulanFoto = [loc.imgSatu, loc.imgDua, loc.imgTiga]; 
 
@@ -648,55 +575,34 @@ window.bukaGaleriFoto = function(index, event) {
             <div class="galeri-modal">
                 <button class="close-galeri" onclick="window.tutupGaleriFoto()">✖</button>
                 <h3 class="galeri-title">${loc.name}</h3>
-                
-                <!-- BUNGKUSAN BARU UNTUK PANAH KIRI-KANAN -->
                 <div class="slider-wrapper" style="position: relative;">
                     <button class="nav-btn prev-btn" onclick="window.geserGaleri(-1)">&#10094;</button>
-                    
                     <div class="galeri-slider" id="galeri-slider">
     `;
     
     kumpulanFoto.forEach((foto, i) => {
         if (foto && foto !== "") {
-            modalHTML += `
-                <div class="foto-container">
-                    <div class="loading-spinner"></div>
-                    <img src="${foto}" alt="Foto ${i+1}" 
-                         onload="this.classList.add('loaded')" 
-                         onerror="this.src='https://via.placeholder.com/400x250?text=Foto+Tidak+Tersedia'; this.classList.add('loaded');">
-                </div>
-            `;
+            modalHTML += `<div class="foto-container"><div class="loading-spinner"></div><img src="${foto}" alt="Foto ${i+1}" onload="this.classList.add('loaded')" onerror="this.src='https://via.placeholder.com/400x250?text=Foto+Tidak+Tersedia'; this.classList.add('loaded');"></div>`;
         }
     });
     
     modalHTML += `
                     </div>
-                    
                     <button class="nav-btn next-btn" onclick="window.geserGaleri(1)">&#10095;</button>
                 </div>
-                <!-- AKHIR BUNGKUSAN -->
-
                 <p class="galeri-hint">PICTURE BY TIM KKN UNDIP TULIS 2026</p>
             </div>
         </div>
     `;
-
     document.body.insertAdjacentHTML('beforeend', modalHTML);
 };
 
-// FUNGSI BARU: Untuk menggeser galeri saat tombol panah diklik
 window.geserGaleri = function(arah) {
     const slider = document.getElementById('galeri-slider');
-    if(slider) {
-        // Mendapatkan lebar satu gambar untuk menentukan jarak geser
-        const jarakGeser = slider.clientWidth; 
-        slider.scrollBy({ left: arah * jarakGeser, behavior: 'smooth' });
-    }
+    if(slider) { const jarakGeser = slider.clientWidth; slider.scrollBy({ left: arah * jarakGeser, behavior: 'smooth' }); }
 };
 
 window.tutupGaleriFoto = function() {
     const overlay = document.getElementById('galeri-overlay');
-    if (overlay) {
-        overlay.remove();
-    }
+    if (overlay) { overlay.remove(); }
 };
