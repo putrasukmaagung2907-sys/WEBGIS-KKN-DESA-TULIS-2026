@@ -764,10 +764,10 @@ body, html {
 }
 
 /* =========================================================
-   PERBAIKAN PRESISI TOMBOL KANAN ATAS (FINAL FIX)
+   PERBAIKAN PRESISI TOMBOL KANAN ATAS (Z-INDEX & ALIGNMENT)
    ========================================================= */
 
-/* 1. Menyeragamkan Lebar, Tinggi, Sudut, dan Teks */
+/* 1. Menyeragamkan Lebar, Tinggi, Sudut, Teks, dan Spasi */
 #filter-toggle-btn,
 .lapor-warga-control,
 #btn-bahasa {
@@ -783,40 +783,52 @@ body, html {
     padding: 0 !important;
     box-sizing: border-box !important;
     box-shadow: 0 4px 6px rgba(0,0,0,0.3) !important;
-    z-index: 1000 !important;
     cursor: pointer !important;
-    
-    /* Wajib: Mereset semua margin/spasi bawaan HTML maupun Leaflet */
     margin: 0 !important; 
 }
 
-/* 2. Sistem Koordinat Absolut (Jarak 10px antar tombol) */
-
-/* Tingkat 1: Tombol Filter */
-#filter-toggle-btn {
-    position: absolute !important;
+/* 2. Tingkat 1: Wadah Filter (Paling Atas & Layer Tertinggi) */
+#filter-container {
+    position: fixed !important; /* Mengunci paksa ke sudut layar, bebas dari peta */
     top: 15px !important;
-    right: 5px !important;
-    left: auto !important;
-}
-
-/* Tingkat 2: Tombol Lapor */
-.lapor-warga-control {
-    position: absolute !important;
-    /* Perhitungan: 15px (Top Atasnya) + 40px (Tinggi Tombol) + 10px (Jarak Spasi) */
-    top: 25px !important;   
     right: 15px !important;
+    z-index: 2000 !important; /* KUNCI PERBAIKAN: Angkat lapisan jauh di atas tombol EN/ID */
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-end !important;
 }
 
-/* Tingkat 3: Tombol Bahasa */
-#btn-bahasa {
-    position: absolute !important;
-    /* Perhitungan: 65px (Top Atasnya) + 40px (Tinggi Tombol) + 10px (Jarak Spasi) */
-    top: 130px !important;  
-    right: 20px !important;
+/* Kembalikan tombol filter ke perilaku normal di dalam wadahnya agar menunya bisa turun ke bawah */
+#filter-toggle-btn {
+    position: relative !important; 
+    top: 0 !important;
+    right: 0 !important;
     left: auto !important;
+}
+
+/* Beri jarak sedikit antara tombol filter dan menu kotaknya saat terbuka */
+#filter-panel {
+    margin-top: 8px !important; 
+    z-index: 2000 !important;
+}
+
+/* 3. Tingkat 2: Tombol Lapor Cepat */
+.lapor-warga-control {
+    position: fixed !important; 
+    top: 65px !important;       /* Perhitungan: 15px + Tinggi 40px + Spasi 10px */
+    right: 15px !important;     /* Disamakan rata kanan persis 15px */
+    z-index: 1000 !important;
+}
+
+/* 4. Tingkat 3: Tombol Bahasa */
+#btn-bahasa {
+    position: fixed !important;
+    top: 115px !important;      /* Perhitungan: 65px + Tinggi 40px + Spasi 10px */
+    right: 15px !important;     /* Disamakan rata kanan persis 15px */
+    left: auto !important;
+    z-index: 999 !important;    /* KUNCI PERBAIKAN: Lapisan diturunkan agar selalu di bawah menu filter */
     
-    /* Mengembalikan warna khusus tombol bahasa */
+    /* Mengembalikan warna bawaan khusus tombol bahasa */
     background: rgba(30, 40, 50, 0.85) !important;
     backdrop-filter: blur(4px) !important;
     color: white !important;
