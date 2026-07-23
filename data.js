@@ -60,10 +60,8 @@ const locations = [
     {
         name: "SDN Tulis 01", 
         lat: -6.949718, lng: 109.788332, 
-        type: "Fasilitas Pendidikan",
-        
-        // Bahasa Indonesia
-        desc: "Sekolah Dasar Negeri utama di Desa Tulis.",
+        type: "Fasilitas Pendidikan",       
+        desc: "SD Negeri Tulis 01 merupakan sekolah dasar negeri yang berlokasi di Jl. Raya Tulis No. 45, Desa Tulis, Kecamatan Tulis, Kabupaten Batang, Jawa Tengah. Sekolah ini memiliki NPSN 20322859 dan telah berdiri sejak tahun 1985 berdasarkan SK Pendirian No. 421.2/021/X/43/85 tertanggal 1 April 1985. SD Negeri Tulis 01 dikenal sebagai sekolah yang unggul dan memiliki akreditasi A berdasarkan SK Akreditasi  tertanggal 20 Oktober 2015. Sekolah ini menerapkan sistem pembelajaran sehari penuh dengan 6 hari pembelajaran dalam seminggu. Dengan akses internet Telkom Speedy dan sumber listrik PLN, SD Negeri Tulis 01 siap mendukung proses belajar mengajar yang efektif dan modern",
         jamOperasional: "Senin - Sabtu (07:00 - 14:00)",
         
         // Bahasa Inggris (Tambahan Baru)

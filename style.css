@@ -412,7 +412,7 @@ body, html {
         position: absolute !important; 
         left: auto !important;      
         right: 0 !important;        /* Posisikan nempel ke kanan */
-        bottom: 22px !important;    /* Angkat ke atas garis merah status bar */
+        bottom: 20px !important;    /* Angkat ke atas garis merah status bar */
         
         writing-mode: horizontal-tb !important; /* Kembalikan arah teks ke horizontal */
         transform: none !important;             
@@ -761,4 +761,64 @@ body, html {
     .leaflet-bottom.leaflet-right {
         bottom: 50px !important; /* Memberikan ruang di bawah legenda untuk teks watermark KKN */
     }
+}
+
+/* =========================================================
+   PERBAIKAN PRESISI TOMBOL KANAN ATAS (FINAL FIX)
+   ========================================================= */
+
+/* 1. Menyeragamkan Lebar, Tinggi, Sudut, dan Teks */
+#filter-toggle-btn,
+.lapor-warga-control,
+#btn-bahasa {
+    width: 140px !important;
+    height: 40px !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 8px !important;
+    font-size: 13px !important;
+    font-weight: bold !important;
+    border-radius: 8px !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3) !important;
+    z-index: 1000 !important;
+    cursor: pointer !important;
+    
+    /* Wajib: Mereset semua margin/spasi bawaan HTML maupun Leaflet */
+    margin: 0 !important; 
+}
+
+/* 2. Sistem Koordinat Absolut (Jarak 10px antar tombol) */
+
+/* Tingkat 1: Tombol Filter */
+#filter-toggle-btn {
+    position: absolute !important;
+    top: 15px !important;
+    right: 5px !important;
+    left: auto !important;
+}
+
+/* Tingkat 2: Tombol Lapor */
+.lapor-warga-control {
+    position: absolute !important;
+    /* Perhitungan: 15px (Top Atasnya) + 40px (Tinggi Tombol) + 10px (Jarak Spasi) */
+    top: 25px !important;   
+    right: 15px !important;
+}
+
+/* Tingkat 3: Tombol Bahasa */
+#btn-bahasa {
+    position: absolute !important;
+    /* Perhitungan: 65px (Top Atasnya) + 40px (Tinggi Tombol) + 10px (Jarak Spasi) */
+    top: 130px !important;  
+    right: 20px !important;
+    left: auto !important;
+    
+    /* Mengembalikan warna khusus tombol bahasa */
+    background: rgba(30, 40, 50, 0.85) !important;
+    backdrop-filter: blur(4px) !important;
+    color: white !important;
+    border: 2px solid #3498db !important;
 }
